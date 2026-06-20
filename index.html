@@ -217,7 +217,7 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        @gradientShift {
+        @keyframes gradientShift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
@@ -231,7 +231,7 @@
         .budget-item { display: flex; flex-direction: column; gap: 6px; }
         .budget-label { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.8px; }
         
-        @inputNeonWaveGreen {
+        @keyframes inputNeonWaveGreen {
             0% { border-color: #10b981; box-shadow: 0 0 4px rgba(16,185,129,0.2); }
             50% { border-color: #34d399; box-shadow: 0 0 12px rgba(52,211,153,0.5); }
             100% { border-color: #10b981; box-shadow: 0 0 4px rgba(16,185,129,0.2); }
@@ -803,7 +803,7 @@
                 <h3>🧮 Numpad Active Calc</h3>
                 <button class="close-calc-btn" onclick="toggleCalculator()">×</button>
             </div>
-            <input type="text" id="calcDisplay" class="calc-screen" value="0" onkeydown="handleCalcKeyboard(event)">
+            <input type="text" id="calcDisplay" class="calc-screen" value="" placeholder="0" onkeydown="handleCalcKeyboard(event)">
             
             <div class="calc-buttons">
                 <button class="calc-btn clear-btn" onclick="clearCalc()">C</button>
@@ -819,14 +819,15 @@
                 <button class="calc-btn" onclick="pressCalc('4')">4</button>
                 <button class="calc-btn" onclick="pressCalc('5')">5</button>
                 <button class="calc-btn" onclick="pressCalc('6')">6</button>
-                <button class="calc-btn op" onclick="pressCalc('.')">.</button>
+                <button class="calc-btn" onclick="pressCalc('.')">.</button>
                 
                 <button class="calc-btn" onclick="pressCalc('1')">1</button>
                 <button class="calc-btn" onclick="pressCalc('2')">2</button>
                 <button class="calc-btn" onclick="pressCalc('3')">3</button>
                 <button class="calc-btn eq" onclick="solveCalc()">=</button>
                 
-                <button class="calc-btn" onclick="pressCalc('0')" style="grid-column: span 2;">0</button>
+                <button class="calc-btn" onclick="pressCalc('0')">0</button>
+                <button class="calc-btn op" onclick="backspaceCalc()" title="Backspace">⌫</button>
             </div>
         </div>
 
@@ -926,19 +927,32 @@
 
                     <div class="new-feature-block-container" style="margin-top: 0; height: 100%; box-sizing: border-box;">
                         <div class="new-feature-title">🗂️ Multi-Bill Sequential History & Overlap Tracking Ledger</div>
-                        <table id="multiBillLedgerTable">
+                        <div style="overflow-x:auto;"><table id="multiBillLedgerTable" style="min-width:1100px;">
                             <thead>
                                 <tr style="background:#4b5563;">
-                                    <th>Bill Stage / Sequence</th>
-                                    <th>Gross Status</th>
-                                    <th>Tax / Royalty Deductions</th>
-                                    <th>Net Paid Volume</th>
-                                    <th>Payment Clearance State</th>
+                                    <th rowspan="2" style="vertical-align:middle;">Bill Stage</th>
+                                    <th rowspan="2" style="vertical-align:middle;">Gross (With GST)</th>
+                                    <th colspan="9" style="background:#374151; letter-spacing:0.5px;">Deductions Breakup</th>
+                                    <th rowspan="2" style="vertical-align:middle;">Total Deductions</th>
+                                    <th rowspan="2" style="vertical-align:middle; color:#34d399;">Net Payable</th>
+                                    <th rowspan="2" style="vertical-align:middle;">Status</th>
+                                </tr>
+                                <tr style="background:#374151; font-size:10px;">
+                                    <th style="background:#374151;">Sec. Deposit</th>
+                                    <th style="background:#374151;">Perf. Security</th>
+                                    <th style="background:#374151;">Income Tax</th>
+                                    <th style="background:#374151;">SGST</th>
+                                    <th style="background:#374151;">CGST</th>
+                                    <th style="background:#374151;">Labour Cess</th>
+                                    <th style="background:#374151;">Royalty</th>
+                                    <th style="background:#374151;">CESS (COM)</th>
+                                    <th style="background:#374151;">Stamp</th>
                                 </tr>
                             </thead>
                             <tbody id="multiBillLedgerBody">
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1443,76 +1457,65 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDN8wHxYswG2_5zTuVX05zedb51pk8kP-I",
-      authDomain: "pavneshbilling.firebaseapp.com",
-      projectId: "pavneshbilling",
-      storageBucket: "pavneshbilling.firebasestorage.app",
-      messagingSenderId: "471182764484",
-      appId: "1:471182764484:web:b5f541216309089cf75c91",
-      measurementId: "G-7R5SD02N5J"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // 🚀 INTEGRATED CLOUD HANDSHAKE
-    window.saveAllDataToCloud = async function(projectSuffix, payload) {
-        try {
-            const cleanSuffix = projectSuffix ? projectSuffix.replace(/[^a-zA-Z0-9_]/g, "") : "default";
-            const projectRef = doc(db, "quantix_portfolio", `project_${cleanSuffix}`);
-            await setDoc(projectRef, {
-                ...payload,
-                lastSyncTimestamp: new Date().toISOString()
+    // Firebase cloud sync — only when running from a real server, not file://
+    if (window.location.protocol !== 'file:') {
+        Promise.all([
+            import("https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"),
+            import("https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js")
+        ]).then(([{ initializeApp }, { getFirestore, doc, setDoc, getDoc }]) => {
+            const app = initializeApp({
+                apiKey: "AIzaSyDN8wHxYswG2_5zTuVX05zedb51pk8kP-I",
+                authDomain: "pavneshbilling.firebaseapp.com",
+                projectId: "pavneshbilling",
+                storageBucket: "pavneshbilling.firebasestorage.app",
+                messagingSenderId: "471182764484",
+                appId: "1:471182764484:web:b5f541216309089cf75c91"
             });
-            console.log("Cloud database synchronized perfectly.");
-        } catch (error) {
-            console.error("Cloud storage handshake failed:", error);
-        }
-    }
+            const db = getFirestore(app);
 
-    window.loadDataFromCloud = async function(projectSuffix) {
-        try {
-            const cleanSuffix = projectSuffix ? projectSuffix.replace(/[^a-zA-Z0-9_]/g, "") : "default";
-            const projectRef = doc(db, "quantix_portfolio", `project_${cleanSuffix}`);
-            const docSnap = await getDoc(projectRef);
-            if (docSnap.exists()) {
-                return docSnap.data();
-            }
-        } catch (error) {
-            console.error("Cloud document extraction fault:", error);
-        }
-        return null;
-    }
-
-    window.saveProjectIndexToCloud = async function(list) {
-        try {
-            const indexRef = doc(db, "quantix_portfolio", "global_project_index");
-            await setDoc(indexRef, { index: list });
-            console.log("Project portfolio index synced to Firestore.");
-        } catch (error) {
-            console.error("Failed to sync index to cloud:", error);
-        }
-    }
-
-    window.loadProjectIndexFromCloud = async function() {
-        try {
-            const indexRef = doc(db, "quantix_portfolio", "global_project_index");
-            const docSnap = await getDoc(indexRef);
-            if (docSnap.exists()) {
-                return docSnap.data().index;
-            }
-        } catch (error) {
-            console.error("Error loading portfolio index:", error);
-        }
-        return null;
+            window.saveAllDataToCloud = async function(projectSuffix, payload) {
+                try {
+                    const key = projectSuffix ? projectSuffix.replace(/[^a-zA-Z0-9_]/g,"") : "default";
+                    await setDoc(doc(db,"quantix_portfolio","project_"+key), {...payload, lastSyncTimestamp: new Date().toISOString()});
+                    console.log("Cloud sync ok.");
+                } catch(e) { console.error("Cloud save failed:", e); }
+            };
+            window.loadDataFromCloud = async function(projectSuffix) {
+                try {
+                    const key = projectSuffix ? projectSuffix.replace(/[^a-zA-Z0-9_]/g,"") : "default";
+                    const snap = await getDoc(doc(db,"quantix_portfolio","project_"+key));
+                    if (snap.exists()) return snap.data();
+                } catch(e) { console.error("Cloud load failed:", e); }
+                return null;
+            };
+            window.saveProjectIndexToCloud = async function(list) {
+                try { await setDoc(doc(db,"quantix_portfolio","global_project_index"), {index: list}); }
+                catch(e) { console.error("Index sync failed:", e); }
+            };
+            window.loadProjectIndexFromCloud = async function() {
+                try {
+                    const snap = await getDoc(doc(db,"quantix_portfolio","global_project_index"));
+                    if (snap.exists()) return snap.data().index;
+                } catch(e) { console.error("Index load failed:", e); }
+                return null;
+            };
+            console.log("✅ Firebase cloud sync ready.");
+        }).catch(e => console.warn("Firebase unavailable, offline mode:", e.message));
+    } else {
+        console.log("📁 file:// mode — localStorage only, cloud sync disabled.");
     }
 </script>
 
 <script>
+    // Safe localStorage wrapper — works even if blocked (file://, sandboxed preview, etc.)
+    const _ls = {
+        get: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+        set: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
+        remove: (k) => { try { localStorage.removeItem(k); } catch(e) {} },
+        length: () => { try { return localStorage.length; } catch(e) { return 0; } },
+        key: (i) => { try { return localStorage.key(i); } catch(e) { return null; } }
+    };
+
     let undoStack = [];
     const MAX_UNDO_LIMIT = 25;
     let autoSaveTimeout = null;
@@ -1609,10 +1612,10 @@
 
     function exportPortfolioToBackupFile() {
         let backupData = {};
-        for (let i = 0; i < localStorage.length; i++) {
-            let key = localStorage.key(i);
+        for (let i = 0; i < _ls.length(); i++) {
+            let key = _ls.key(i);
             if (key.startsWith('rwd_billing_v12_master') || key === 'rwd_projects_index' || key === 'rwd_active_project') {
-                backupData[key] = localStorage.getItem(key);
+                backupData[key] = _ls.get(key);
             }
         }
         let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
@@ -1640,7 +1643,7 @@
                 
                 if(confirm("सावधान: यह बैकअप आपके वर्तमान सभी प्रोजेक्ट्स को बदल देगा! क्या आप जारी रखना चाहते हैं?")) {
                     Object.keys(parsedBackup).forEach(key => {
-                        localStorage.setItem(key, parsedBackup[key]);
+                        _ls.set(key, parsedBackup[key]);
                     });
                     
                     if(parsedBackup['rwd_projects_index'] && typeof window.saveProjectIndexToCloud === "function"){
@@ -1679,10 +1682,10 @@
     function toggleSystemTheme() {
         document.body.classList.toggle('dark-theme');
         let mode = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
-        localStorage.setItem('rwd_theme_preference', mode);
+        _ls.set('rwd_theme_preference', mode);
     }
 
-    if(localStorage.getItem('rwd_theme_preference') === 'dark') {
+    if(_ls.get('rwd_theme_preference') === 'dark') {
         document.body.classList.add('dark-theme');
     }
 
@@ -1713,11 +1716,11 @@
     }
 
     function getProjectsList() {
-        return JSON.parse(localStorage.getItem('rwd_projects_index') || '["default"]');
+        try { return JSON.parse(_ls.get('rwd_projects_index') || '["default"]'); } catch(e) { return ['default']; }
     }
 
     function saveProjectsList(list) {
-        localStorage.setItem('rwd_projects_index', JSON.stringify(list));
+        _ls.set('rwd_projects_index', JSON.stringify(list));
         if (typeof window.saveProjectIndexToCloud === "function") {
             window.saveProjectIndexToCloud(list);
         }
@@ -1731,7 +1734,7 @@
         if(!list) {
             list = getProjectsList();
         } else {
-            localStorage.setItem('rwd_projects_index', JSON.stringify(list));
+            _ls.set('rwd_projects_index', JSON.stringify(list));
         }
 
         let sel = document.getElementById('projectSelector');
@@ -1744,12 +1747,12 @@
             sel.appendChild(opt);
         });
         
-        let currentActive = localStorage.getItem('rwd_active_project') || 'default';
+        let currentActive = _ls.get('rwd_active_project') || 'default';
         if (list.includes(currentActive)) {
             sel.value = currentActive;
         } else {
             sel.value = 'default';
-            localStorage.setItem('rwd_active_project', 'default');
+            _ls.set('rwd_active_project', 'default');
         }
     }
 
@@ -1767,7 +1770,7 @@
                 list.push(currentName);
                 saveProjectsList(list);
             }
-            localStorage.setItem('rwd_active_project', currentName);
+            _ls.set('rwd_active_project', currentName);
             await initProjectDropdown();
             sel.value = currentName;
         }
@@ -1790,7 +1793,7 @@
 
         list.push(projName);
         saveProjectsList(list);
-        localStorage.setItem('rwd_active_project', projName);
+        _ls.set('rwd_active_project', projName);
         
         document.getElementById('globalWorkName').value = '';
         document.getElementById('globalBondNo').value = '';
@@ -1863,8 +1866,8 @@
             list = list.filter(item => item !== currentName);
             saveProjectsList(list);
             
-            localStorage.removeItem('rwd_billing_v12_master_' + currentName);
-            localStorage.setItem('rwd_active_project', 'default');
+            let cleanDeleteSuffix = currentName.trim().toLowerCase().replace(/[^a-zA-Z0-9_]/g, ""); _ls.remove('rwd_billing_v12_master_' + cleanDeleteSuffix);
+            _ls.set('rwd_active_project', 'default');
             
             await initProjectDropdown();
             await loadSavedData();
@@ -1874,7 +1877,7 @@
 
     async function loadSelectedProject() {
         let sel = document.getElementById('projectSelector');
-        localStorage.setItem('rwd_active_project', sel.value);
+        _ls.set('rwd_active_project', sel.value);
         await loadSavedData();
         showToast("📂 प्रोजेक्ट लोड हो गया!");
     }
@@ -2809,60 +2812,60 @@
     function updateMultiBillLedgerView() {
         let seqStr = document.getElementById('globalBillSequence').value;
         let typeStr = document.getElementById('globalBillType').value;
-        let activeCycle = seqStr + " " + typeStr + " Bill";
-        
+        let billLabel = seqStr + ' ' + typeStr + ' Bill';
+
         let ledgerBody = document.getElementById('multiBillLedgerBody');
-        if(!ledgerBody) return;
+        if (!ledgerBody) return;
         ledgerBody.innerHTML = '';
 
-        let allSeq = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
-        let activeIndex = allSeq.indexOf(seqStr);
-        if(activeIndex === -1) activeIndex = 0;
-
-        let cyclesList = [];
-        for(let i=0; i<=activeIndex; i++) {
-            if (i === activeIndex) {
-                cyclesList.push(activeCycle); 
-            } else {
-                cyclesList.push(allSeq[i] + " Running Bill"); 
-            }
-        }
-
+        // --- Read ONLY current project real values from DOM ---
         let totalThis = 0;
         document.querySelectorAll('#abstractTable tbody tr').forEach(row => {
             totalThis += parseFloat(row.querySelector('.abs-this-amt').value) || 0;
         });
-        
-        let gstPercent = parseFloat(document.getElementById('cfgSettingGST').value) || 0;
-        let currentGross = totalThis + (totalThis * gstPercent / 100);
-        let currentDeductions = parseFloat(document.getElementById('lblTotalDeductions').innerText) || 0;
-        let currentNet = parseFloat(document.getElementById('lblActualNetPayableContractor').innerText) || 0;
 
-        cyclesList.forEach(cycle => {
-            let tr = document.createElement('tr');
-            if(cycle === activeCycle) {
-                tr.style.background = "rgba(139,92,246,0.12)";
-                tr.style.fontWeight = "bold";
-                tr.innerHTML = `<td>🎯 ${cycle} (Current)</td>
-                                <td>₹ ${currentGross.toFixed(2)}</td>
-                                <td>₹ ${currentDeductions.toFixed(2)}</td>
-                                <td style="color:var(--success);">₹ ${currentNet.toFixed(2)}</td>
-                                <td><span class="status-badge-ms var(--warning)">Processing</span></td>`;
-            } else {
-                let mockMultiplier = 0.85 - (0.05 * (activeIndex - cyclesList.indexOf(cycle))); 
-                if(mockMultiplier < 0.2) mockMultiplier = 0.2;
-                
-                let mockGross = currentGross * mockMultiplier;
-                if(mockGross === 0) mockGross = (Math.random() * 50000) + 10000;
-                
-                tr.innerHTML = `<td>✔ ${cycle}</td>
-                                <td>₹ ${(mockGross).toFixed(2)}</td>
-                                <td>₹ ${(currentDeductions * mockMultiplier).toFixed(2)}</td>
-                                <td>₹ ${(currentNet * mockMultiplier).toFixed(2)}</td>
-                                <td><span class="status-badge-ms ms-bg-success">Cleared</span></td>`;
-            }
-            ledgerBody.appendChild(tr);
-        });
+        let gstPercent = parseFloat(document.getElementById('cfgSettingGST').value) || 0;
+        let gross      = totalThis + (totalThis * gstPercent / 100);
+        let sd         = parseFloat(document.getElementById('pSecDepositFinal').innerText)  || 0;
+        let perf       = parseFloat(document.getElementById('pPerfSecurityFinal').innerText) || 0;
+        let it         = parseFloat(document.getElementById('pIncomeTax').innerText)         || 0;
+        let sgst       = parseFloat(document.getElementById('pSgst').innerText)              || 0;
+        let cgst       = parseFloat(document.getElementById('pCgst').innerText)              || 0;
+        let cess       = parseFloat(document.getElementById('pLaborCess').innerText)         || 0;
+        let royalty    = parseFloat(document.getElementById('pRoyalty').innerText)           || 0;
+        let com        = parseFloat(document.getElementById('pComFinal').innerText)          || 0;
+        let stamp      = parseFloat(document.getElementById('pStampFinal').innerText)        || 0;
+        let totalDeduct= parseFloat(document.getElementById('lblTotalDeductions').innerText) || 0;
+        let net        = parseFloat(document.getElementById('lblActualNetPayableContractor').innerText) || 0;
+
+        // Format: no rupee sign, Indian number format
+        function fmt(v) {
+            return (v || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        // Single row — current project only
+        let tr = document.createElement('tr');
+        tr.style.background = 'rgba(139,92,246,0.13)';
+        tr.style.fontWeight = '700';
+        tr.innerHTML = `
+            <td style="text-align:left; padding-left:10px;">
+                🎯 ${billLabel}
+                <span style="font-size:10px; background:rgba(139,92,246,0.3); padding:2px 6px; border-radius:4px; margin-left:6px;">CURRENT</span>
+            </td>
+            <td>${fmt(gross)}</td>
+            <td style="color:#fbbf24;">${fmt(sd)}</td>
+            <td style="color:#fbbf24;">${fmt(perf)}</td>
+            <td style="color:#f87171;">${fmt(it)}</td>
+            <td style="color:#f87171;">${fmt(sgst)}</td>
+            <td style="color:#f87171;">${fmt(cgst)}</td>
+            <td style="color:#f87171;">${fmt(cess)}</td>
+            <td style="color:#fb923c;">${fmt(royalty)}</td>
+            <td style="color:#fb923c;">${fmt(com)}</td>
+            <td style="color:#fb923c;">${fmt(stamp)}</td>
+            <td style="color:#ef4444; font-weight:800;">${fmt(totalDeduct)}</td>
+            <td style="color:#34d399; font-weight:800; font-size:14px;">${fmt(net)}</td>
+            <td><span class="status-badge-ms ms-bg-warning">Processing</span></td>`;
+        ledgerBody.appendChild(tr);
     }
 
     function triggerPaymentSync() {
@@ -3025,26 +3028,61 @@
     function pressCalc(val) {
         let scr = document.getElementById('calcDisplay');
         if(!scr) return;
-        if (scr.value === "0" || scr.value === "Error") scr.value = val; else scr.value += val;
+        let cur = scr.value;
+        let operators = ['+', '-', '*', '/'];
+        // Error state reset
+        if (cur === "Error") { scr.value = operators.includes(val) ? "" : val; return; }
+        // Prevent consecutive operators (replace last operator)
+        if (operators.includes(val) && operators.includes(cur.slice(-1))) {
+            scr.value = cur.slice(0, -1) + val; return;
+        }
+        // Prevent multiple dots in the same number segment
+        if (val === '.') {
+            let parts = cur.split(/[+\-*\/]/);
+            if (parts[parts.length - 1].includes('.')) return;
+        }
+        // Replace leading zero only for digits, not operators
+        if ((cur === "0" || cur === "") && !operators.includes(val) && val !== '.') {
+            scr.value = val;
+        } else {
+            scr.value += val;
+        }
+    }
+    function backspaceCalc() {
+        let scr = document.getElementById('calcDisplay');
+        if(!scr) return;
+        if (scr.value === "Error" || scr.value.length <= 1) { scr.value = ""; return; }
+        scr.value = scr.value.slice(0, -1);
+        if (scr.value === "-") scr.value = "";
     }
     function clearCalc() { 
         let scr = document.getElementById('calcDisplay');
-        if(scr) scr.value = "0"; 
+        if(scr) scr.value = ""; 
     }
     function solveCalc() { 
         let scr = document.getElementById('calcDisplay');
         if(!scr) return;
         try {
-            let expr = scr.value.replace(/[^0-9+\-*/.]/g, ''); if(!expr) return;
-            scr.value = Number(eval(expr).toFixed(4)).toString();
-        } catch { scr.value = "Error"; } 
+            // Sanitize: only allow safe numeric expression characters
+            let expr = scr.value.replace(/[^0-9+\-*/.]/g, '');
+            if(!expr || expr === "") return;
+            // Remove trailing operator before eval
+            expr = expr.replace(/[+\-*\/]+$/, '');
+            if(!expr) return;
+            let result = Function('"use strict"; return (' + expr + ')')();
+            if (!isFinite(result)) { scr.value = "Error"; return; }
+            // Smart display: avoid unnecessary decimals and exponential notation
+            let rounded = parseFloat(result.toFixed(10));
+            scr.value = parseFloat(rounded.toPrecision(10)).toString();
+        } catch(e) { scr.value = "Error"; } 
     }
     function handleCalcKeyboard(event) {
         let allowedKeys = ['0','1','2','3','4','5','6','7','8','9','+','-','*','/','.'];
         if (event.key === 'Enter') { event.preventDefault(); solveCalc(); } 
         else if (event.key === 'Escape') { event.preventDefault(); clearCalc(); }
         else if (event.key === 'Backspace') {
-            setTimeout(() => { if(document.getElementById('calcDisplay').value === "") document.getElementById('calcDisplay').value = "0"; }, 10);
+            event.preventDefault();
+            backspaceCalc();
         }
         else if (!allowedKeys.includes(event.key) && !event.ctrlKey && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
             event.preventDefault();
@@ -3059,10 +3097,7 @@
                 let key = e.key;
                 if(['0','1','2','3','4','5','6','7','8','9','+','-','*','/','.'].includes(key)) { e.preventDefault(); pressCalc(key); }
                 else if (key === 'Enter') { e.preventDefault(); solveCalc(); }
-                else if (key === 'Backspace') {
-                    e.preventDefault();
-                    if(scr.value.length > 1 && scr.value !== "Error") scr.value = scr.value.slice(0, -1); else scr.value = "0";
-                }
+                else if (key === 'Backspace') { e.preventDefault(); backspaceCalc(); }
                 else if (key === 'Escape') { e.preventDefault(); clearCalc(); }
             }
         }
@@ -3109,13 +3144,13 @@
     }
 
     function getActiveProjectSuffix() {
-        let currentActive = localStorage.getItem('rwd_active_project') || 'default';
+        let currentActive = _ls.get('rwd_active_project') || 'default';
         return currentActive === 'default' ? '' : '_' + currentActive;
     }
 
     // 🌐 INTEGRATED LOCAL AND CLOUD SAVE SYSTEM
     async function saveAllData(targetProject = null) {
-        let currentActive = localStorage.getItem('rwd_active_project') || 'default';
+        let currentActive = _ls.get('rwd_active_project') || 'default';
         let rawSuffix = targetProject ? targetProject : currentActive;
         let cleanSuffix = rawSuffix.trim().toLowerCase().replace(/[^a-zA-Z0-9_]/g, "");
         let suffix = cleanSuffix === 'default' ? '' : '_' + cleanSuffix;
@@ -3200,7 +3235,7 @@
             });
         });
         
-        localStorage.setItem('rwd_billing_v12_master' + suffix, JSON.stringify(dataObj));
+        _ls.set('rwd_billing_v12_master' + suffix, JSON.stringify(dataObj));
 
         if (typeof window.saveAllDataToCloud === "function") {
             await window.saveAllDataToCloud(suffix, dataObj);
@@ -3209,7 +3244,7 @@
 
     // 2. CLOUD DATA INJECTION ENGINE
     async function loadSavedData() {
-        let currentActive = localStorage.getItem('rwd_active_project') || 'default';
+        let currentActive = _ls.get('rwd_active_project') || 'default';
         let cleanSuffix = currentActive.trim().toLowerCase().replace(/[^a-zA-Z0-9_]/g, "");
         let suffix = cleanSuffix === 'default' ? '' : '_' + cleanSuffix;
         let dataObj = null;
@@ -3226,7 +3261,7 @@
         }
 
         if (!dataObj) {
-            let rawData = localStorage.getItem('rwd_billing_v12_master' + suffix);
+            let rawData = _ls.get('rwd_billing_v12_master' + suffix);
             if(rawData) dataObj = JSON.parse(rawData);
         }
         
@@ -3329,7 +3364,7 @@
         updateTab1GrandTotal(); updateTotalsOnly(); updateRoyaltyTotals(); triggerPaymentSync();
         toggleLastPaidDateVisibility(); updateExecutiveDashboardMetrics();
 
-        localStorage.setItem('rwd_billing_v12_master' + suffix, JSON.stringify(dataObj));
+        _ls.set('rwd_billing_v12_master' + suffix, JSON.stringify(dataObj));
 
         if(badge) {
             badge.innerText = "✓ Cloud Synced";
@@ -3444,9 +3479,9 @@
 
     // 🚀 STABLE ASYNC INITIALIZATION ON WINDOW LOAD
     window.onload = async function() {
-        await initProjectDropdown(); 
-        await loadSavedData(); 
-        switchTab('tab5');
+        try { await initProjectDropdown(); } catch(e) { console.warn('initProjectDropdown failed:', e); }
+        try { await loadSavedData(); } catch(e) { console.warn('loadSavedData failed:', e); }
+        try { switchTab('tab5'); } catch(e) { console.warn('switchTab failed:', e); }
     }
 </script>
 </body>
