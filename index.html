@@ -803,7 +803,7 @@
                 <h3>🧮 Numpad Active Calc</h3>
                 <button class="close-calc-btn" onclick="toggleCalculator()">×</button>
             </div>
-            <input type="text" id="calcDisplay" class="calc-screen" value="0" onkeydown="handleCalcKeyboard(event)">
+            <input type="text" id="calcDisplay" class="calc-screen" value="" placeholder="0" onkeydown="handleCalcKeyboard(event)">
             
             <div class="calc-buttons">
                 <button class="calc-btn clear-btn" onclick="clearCalc()">C</button>
@@ -1289,7 +1289,9 @@
 
                         <div class="pay-row" style="border-top: 1px dashed var(--border-color); padding-top: 6px; margin-top: 6px;">
                             <label>Royalty Amount:</label>
-                            <span id="pRoyalty" class="linked-bg">0.00</span>
+                            <span id="pRoyaltyAuto" style="color:var(--text-light); font-size:11px; width:60px;" title="Auto (from Royalty tab)">0.0000</span>
+                            <input type="number" id="pRoyaltyManual" style="width:90px;" placeholder="Manual" step="0.0001" onfocus="saveState()" oninput="calculateFinalPayment(); triggerLiveAutoSave();">
+                            <span id="pRoyaltyFinal" class="linked-bg" style="background:var(--bg-main); font-weight:bold; width:90px;">0.0000</span>
                         </div>
                         
                         <div class="pay-row">
@@ -1820,6 +1822,7 @@
         document.getElementById('txtLastBillDeductGrand').value = '';
         document.getElementById('manualDeductCheckbox').checked = false;
 
+        document.getElementById('pRoyaltyManual').value = '';
         document.getElementById('pDmfManual').value = '';
         document.getElementById('pComManual').value = '';
         document.getElementById('pStampManual').value = '';
@@ -1902,6 +1905,7 @@
             manualDeductChecked: document.getElementById('manualDeductCheckbox').checked,
             manualDeductValue: document.getElementById('txtLastBillDeductGrand').value,
             
+            royaltyManualVal: document.getElementById('pRoyaltyManual').value,
             dmfVal: document.getElementById('pDmfManual').value,
             comVal: document.getElementById('pComManual').value,
             stampVal: document.getElementById('pStampManual').value,
@@ -2007,6 +2011,7 @@
         document.getElementById('tab2RoundOffToggle').checked = dataObj.tab2RoundOffMode !== undefined ? dataObj.tab2RoundOffMode : true;
         document.getElementById('tab3RoundOffToggle').checked = dataObj.tab3RoundOffMode !== undefined ? dataObj.tab3RoundOffMode : true;
         
+        document.getElementById('pRoyaltyManual').value = dataObj.royaltyManualVal || '';
         document.getElementById('pDmfManual').value = dataObj.dmfVal || '';
         document.getElementById('pComManual').value = dataObj.comVal || '';
         document.getElementById('pStampManual').value = dataObj.stampVal || '';
@@ -2483,9 +2488,9 @@
         let stoneFactor = parseFloat(row.querySelector('.r-stone-factor').value) || 0;
         
         let isTab3Round = document.getElementById('tab3RoundOffToggle').checked;
-        row.querySelector('.r-sand-qty').value = isTab3Round ? Math.round(itemQty * sandFactor).toFixed(0) : (itemQty * sandFactor).toFixed(2);
-        row.querySelector('.r-grit-qty').value = isTab3Round ? Math.round(itemQty * gritFactor).toFixed(0) : (itemQty * gritFactor).toFixed(2);
-        row.querySelector('.r-stone-qty').value = isTab3Round ? Math.round(itemQty * stoneFactor).toFixed(0) : (itemQty * stoneFactor).toFixed(2);
+        row.querySelector('.r-sand-qty').value = isTab3Round ? Math.round(itemQty * sandFactor).toFixed(0) : (itemQty * sandFactor).toFixed(4);
+        row.querySelector('.r-grit-qty').value = isTab3Round ? Math.round(itemQty * gritFactor).toFixed(0) : (itemQty * gritFactor).toFixed(4);
+        row.querySelector('.r-stone-qty').value = isTab3Round ? Math.round(itemQty * stoneFactor).toFixed(0) : (itemQty * stoneFactor).toFixed(4);
         
         updateRoyaltyTotals();
         triggerLiveAutoSave();
@@ -2504,25 +2509,25 @@
             totalGrit += qty * gFact;
             totalStone += qty * stFact;
             
-            row.querySelector('.r-sand-qty').value = isTab3Round ? Math.round(qty * sFact).toFixed(0) : (qty * sFact).toFixed(2);
-            row.querySelector('.r-grit-qty').value = isTab3Round ? Math.round(qty * gFact).toFixed(0) : (qty * gFact).toFixed(2);
-            row.querySelector('.r-stone-qty').value = isTab3Round ? Math.round(qty * stFact).toFixed(0) : (qty * stFact).toFixed(2);
+            row.querySelector('.r-sand-qty').value = isTab3Round ? Math.round(qty * sFact).toFixed(0) : (qty * sFact).toFixed(4);
+            row.querySelector('.r-grit-qty').value = isTab3Round ? Math.round(qty * gFact).toFixed(0) : (qty * gFact).toFixed(4);
+            row.querySelector('.r-stone-qty').value = isTab3Round ? Math.round(qty * stFact).toFixed(0) : (qty * stFact).toFixed(4);
         });
 
-        document.getElementById('sumSandQty').innerText = isTab3Round ? Math.round(totalSand).toFixed(0) : totalSand.toFixed(2);
-        document.getElementById('sumGritQty').innerText = isTab3Round ? Math.round(totalGrit).toFixed(0) : totalGrit.toFixed(2);
-        document.getElementById('sumStoneQty').innerText = isTab3Round ? Math.round(totalStone).toFixed(0) : totalStone.toFixed(2);
+        document.getElementById('sumSandQty').innerText = isTab3Round ? Math.round(totalSand).toFixed(0) : totalSand.toFixed(4);
+        document.getElementById('sumGritQty').innerText = isTab3Round ? Math.round(totalGrit).toFixed(0) : totalGrit.toFixed(4);
+        document.getElementById('sumStoneQty').innerText = isTab3Round ? Math.round(totalStone).toFixed(0) : totalStone.toFixed(4);
         
         let overallQty = totalSand + totalGrit + totalStone;
-        document.getElementById('overallRoyaltyQty').innerText = isTab3Round ? Math.round(overallQty).toFixed(0) : overallQty.toFixed(2);
+        document.getElementById('overallRoyaltyQty').innerText = isTab3Round ? Math.round(overallQty).toFixed(0) : overallQty.toFixed(4);
 
         let lastOverallQty = parseFloat(document.getElementById('lastOverallRoyaltyQty').value) || 0;
         let forThisBillQty = overallQty - lastOverallQty;
-        document.getElementById('forThisBillRoyaltyQty').innerText = isTab3Round ? Math.round(forThisBillQty).toFixed(0) : forThisBillQty.toFixed(2);
+        document.getElementById('forThisBillRoyaltyQty').innerText = isTab3Round ? Math.round(forThisBillQty).toFixed(0) : forThisBillQty.toFixed(4);
 
-        document.getElementById('rSandTotalQty').innerText = isTab3Round ? Math.round(totalSand).toFixed(0) : totalSand.toFixed(2);
-        document.getElementById('rGritTotalQty').innerText = isTab3Round ? Math.round(totalGrit).toFixed(0) : totalGrit.toFixed(2);
-        document.getElementById('rStoneTotalQty').innerText = isTab3Round ? Math.round(totalStone).toFixed(0) : totalStone.toFixed(2);
+        document.getElementById('rSandTotalQty').innerText = isTab3Round ? Math.round(totalSand).toFixed(0) : totalSand.toFixed(4);
+        document.getElementById('rGritTotalQty').innerText = isTab3Round ? Math.round(totalGrit).toFixed(0) : totalGrit.toFixed(4);
+        document.getElementById('rStoneTotalQty').innerText = isTab3Round ? Math.round(totalStone).toFixed(0) : totalStone.toFixed(4);
         
         updateRoyaltyFinal();
     }
@@ -2546,13 +2551,13 @@
         let grossGrit = totalGrit * rUnified; 
         let grossStone = totalStone * rUnified;
         
-        document.getElementById('grossSandRoyalty').innerText = isTab3Round ? Math.round(grossSand).toFixed(0) : grossSand.toFixed(2);
-        document.getElementById('grossGritRoyalty').innerText = isTab3Round ? Math.round(grossGrit).toFixed(0) : grossGrit.toFixed(2);
-        document.getElementById('grossStoneRoyalty').innerText = isTab3Round ? Math.round(grossStone).toFixed(0) : grossStone.toFixed(2);
+        document.getElementById('grossSandRoyalty').innerText = isTab3Round ? Math.round(grossSand).toFixed(0) : grossSand.toFixed(4);
+        document.getElementById('grossGritRoyalty').innerText = isTab3Round ? Math.round(grossGrit).toFixed(0) : grossGrit.toFixed(4);
+        document.getElementById('grossStoneRoyalty').innerText = isTab3Round ? Math.round(grossStone).toFixed(0) : grossStone.toFixed(4);
 
-        document.getElementById('netSandRoyalty').innerText = isTab3Round ? Math.round(grossSand - dSand).toFixed(0) : (grossSand - dSand).toFixed(2);
-        document.getElementById('netGritRoyalty').innerText = isTab3Round ? Math.round(grossGrit - dGrit).toFixed(0) : (grossGrit - dGrit).toFixed(2);
-        document.getElementById('netStoneRoyalty').innerText = isTab3Round ? Math.round(grossStone - dStone).toFixed(0) : (grossStone - dStone).toFixed(2);
+        document.getElementById('netSandRoyalty').innerText = isTab3Round ? Math.round(grossSand - dSand).toFixed(0) : (grossSand - dSand).toFixed(4);
+        document.getElementById('netGritRoyalty').innerText = isTab3Round ? Math.round(grossGrit - dGrit).toFixed(0) : (grossGrit - dGrit).toFixed(4);
+        document.getElementById('netStoneRoyalty').innerText = isTab3Round ? Math.round(grossStone - dStone).toFixed(0) : (grossStone - dStone).toFixed(4);
 
         let totalThisBillGross = 0;
         if(document.getElementById('chkEnableOverallCalc').checked) {
@@ -2562,11 +2567,11 @@
             totalThisBillGross = grossSand + grossGrit + grossStone;
         }
         
-        document.getElementById('lblThisBillRoyaltyGrand').innerText = isTab3Round ? Math.round(totalThisBillGross).toFixed(0) : totalThisBillGross.toFixed(2);
+        document.getElementById('lblThisBillRoyaltyGrand').innerText = isTab3Round ? Math.round(totalThisBillGross).toFixed(0) : totalThisBillGross.toFixed(4);
 
         if(!document.getElementById('manualDeductCheckbox').checked) {
             let totalDeductions = dSand + dGrit + dStone;
-            document.getElementById('txtLastBillDeductGrand').value = totalDeductions.toFixed(2);
+            document.getElementById('txtLastBillDeductGrand').value = totalDeductions.toFixed(4);
         }
         calculateNetRoyaltyV7();
     }
@@ -2591,7 +2596,7 @@
         }
                             
         let deductCombined = parseFloat(document.getElementById('txtLastBillDeductGrand').value) || 0;
-        document.getElementById('lblNetPayableRoyaltyGrand').innerText = isTab3Round ? Math.round(grossCombined - deductCombined).toFixed(0) : (grossCombined - deductCombined).toFixed(2);
+        document.getElementById('lblNetPayableRoyaltyGrand').innerText = isTab3Round ? Math.round(grossCombined - deductCombined).toFixed(0) : (grossCombined - deductCombined).toFixed(4);
         triggerPaymentSync();
     }
     function addSingleRowTab3(vals = null) {
@@ -2912,7 +2917,7 @@
         let royaltyValueOutput = grossCombinedRoyalty - deductCombinedRoyalty;
         
         let isTab3Round = document.getElementById('tab3RoundOffToggle').checked;
-        document.getElementById('pRoyalty').innerText = isTab3Round ? Math.round(royaltyValueOutput).toFixed(0) : royaltyValueOutput.toFixed(2);
+        document.getElementById('pRoyaltyAuto').innerText = isTab3Round ? Math.round(royaltyValueOutput).toFixed(0) : royaltyValueOutput.toFixed(4);
 
         let conversionFactor = parseFloat(document.getElementById('cfgRoyaltyConversionFactor').value) || 0.5714;
         let baseMiningRoyalty = royaltyValueOutput * conversionFactor;
@@ -2986,7 +2991,12 @@
         let sgst = parseFloat(document.getElementById('pSgst').innerText) || 0;
         let cgst = parseFloat(document.getElementById('pCgst').innerText) || 0;
         let cess = parseFloat(document.getElementById('pLaborCess').innerText) || 0;
-        let royalty = parseFloat(document.getElementById('pRoyalty').innerText) || 0;
+
+        let royaltyAuto = parseFloat(document.getElementById('pRoyaltyAuto').innerText) || 0;
+        let royaltyManualStr = document.getElementById('pRoyaltyManual').value;
+        let royalty = (royaltyManualStr !== "") ? parseFloat(royaltyManualStr) : royaltyAuto;
+        if(isNaN(royalty)) royalty = 0;
+        document.getElementById('pRoyaltyFinal').innerText = isRoundOff ? Math.round(royalty).toFixed(0) : royalty.toFixed(4);
         
         let totalDynamicExtra = 0;
         document.querySelectorAll('.dynamic-head-value').forEach(input => { totalDynamicExtra += parseFloat(input.value) || 0; });
@@ -3022,29 +3032,69 @@
     }
 
     // 🧮 FIX CALCULATOR INTERNALS
+    let calcResultShown = false; // true right after '=' was pressed
     function pressCalc(val) {
         let scr = document.getElementById('calcDisplay');
         if(!scr) return;
-        if (scr.value === "0" || scr.value === "Error") scr.value = val; else scr.value += val;
+        let isDigitOrDot = /^[0-9.]$/.test(val);
+
+        if (calcResultShown) {
+            // BUG FIX: previously, pressing a number right after "=" kept
+            // appending to the old result (e.g. 5+5=10, then pressing "3"
+            // produced "103" instead of starting a fresh "3"). Now a digit
+            // starts a new number, while an operator continues from the result.
+            if (isDigitOrDot) {
+                scr.value = (val === '.') ? '0.' : val;
+            } else {
+                scr.value += val;
+            }
+            calcResultShown = false;
+            return;
+        }
+
+        if (scr.value === "" || scr.value === "0" || scr.value === "Error") {
+            scr.value = (val === '.') ? '0.' : val;
+        } else if (val === '.' && /\.[0-9]*$/.test(scr.value.split(/[+\-*/]/).pop())) {
+            // BUG FIX: block a second decimal point inside the same number segment
+            // (e.g. "12.5.3" used to be accepted and silently broke the result).
+            return;
+        } else {
+            scr.value += val;
+        }
     }
     function clearCalc() { 
         let scr = document.getElementById('calcDisplay');
-        if(scr) scr.value = "0"; 
+        if(scr) scr.value = ""; 
+        calcResultShown = false;
     }
     function solveCalc() { 
         let scr = document.getElementById('calcDisplay');
         if(!scr) return;
         try {
             let expr = scr.value.replace(/[^0-9+\-*/.]/g, ''); if(!expr) return;
-            scr.value = Number(eval(expr).toFixed(4)).toString();
+            // BUG FIX: a trailing operator (e.g. "12+") used to throw and silently
+            // fall into the catch block with no useful feedback; strip it first.
+            expr = expr.replace(/[+\-*/.]+$/, '');
+            if(!expr) return;
+            // BUG FIX (root cause of e.g. 25+25 showing 46): a leading zero before
+            // a number (like "025") gets read by JS as an old-style OCTAL literal
+            // in loose mode -> 025 = 21, not 25. Strip redundant leading zeros so
+            // every number is read as plain decimal, then evaluate in strict mode
+            // (which also throws instead of silently mis-parsing anything similar).
+            expr = expr.replace(/(^|[+\-*/])0+(?=\d)/g, '$1');
+            let result = Function('"use strict"; return (' + expr + ');')();
+            if (!isFinite(result)) { scr.value = "Error"; calcResultShown = true; return; }
+            scr.value = Number(result.toFixed(4)).toString();
         } catch { scr.value = "Error"; } 
+        calcResultShown = true;
     }
     function handleCalcKeyboard(event) {
         let allowedKeys = ['0','1','2','3','4','5','6','7','8','9','+','-','*','/','.'];
         if (event.key === 'Enter') { event.preventDefault(); solveCalc(); } 
         else if (event.key === 'Escape') { event.preventDefault(); clearCalc(); }
         else if (event.key === 'Backspace') {
-            setTimeout(() => { if(document.getElementById('calcDisplay').value === "") document.getElementById('calcDisplay').value = "0"; }, 10);
+            calcResultShown = false;
+            setTimeout(() => { if(document.getElementById('calcDisplay').value === "0") document.getElementById('calcDisplay').value = ""; }, 10);
         }
         else if (!allowedKeys.includes(event.key) && !event.ctrlKey && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
             event.preventDefault();
@@ -3061,7 +3111,8 @@
                 else if (key === 'Enter') { e.preventDefault(); solveCalc(); }
                 else if (key === 'Backspace') {
                     e.preventDefault();
-                    if(scr.value.length > 1 && scr.value !== "Error") scr.value = scr.value.slice(0, -1); else scr.value = "0";
+                    if(scr.value.length > 1 && scr.value !== "Error") scr.value = scr.value.slice(0, -1); else scr.value = "";
+                    calcResultShown = false;
                 }
                 else if (key === 'Escape') { e.preventDefault(); clearCalc(); }
             }
@@ -3142,6 +3193,7 @@
             manualDeductChecked: document.getElementById('manualDeductCheckbox').checked,
             manualDeductValue: document.getElementById('txtLastBillDeductGrand').value,
             
+            royaltyManualVal: document.getElementById('pRoyaltyManual').value,
             dmfVal: document.getElementById('pDmfManual').value,
             comVal: document.getElementById('pComManual').value,
             stampVal: document.getElementById('pStampManual').value,
@@ -3285,6 +3337,7 @@
         document.getElementById('tab2RoundOffToggle').checked = dataObj.tab2RoundOffMode !== undefined ? dataObj.tab2RoundOffMode : true;
         document.getElementById('tab3RoundOffToggle').checked = dataObj.tab3RoundOffMode !== undefined ? dataObj.tab3RoundOffMode : true;
         
+        document.getElementById('pRoyaltyManual').value = dataObj.royaltyManualVal || '';
         document.getElementById('pDmfManual').value = dataObj.dmfVal || '';
         document.getElementById('pComManual').value = dataObj.comVal || '';
         document.getElementById('pStampManual').value = dataObj.stampVal || '';
