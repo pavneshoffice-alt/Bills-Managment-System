@@ -259,6 +259,20 @@
         .pp-bill-pair select { flex: 1; }
         /* ================= END UNIFIED PROJECT PORTFOLIO CARD ================= */
 
+        /* ================= NEW PROJECT MODAL — SECTIONS ================= */
+        .np-section-label {
+            font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;
+            letter-spacing: 0.7px; margin: 20px 0 10px 0; display: flex; align-items: center; gap: 7px;
+        }
+        .np-section-label:first-of-type { margin-top: 0; }
+        .np-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
+        .np-seq-badge {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            background: var(--primary-light); color: var(--primary); font-weight: 800; font-size: 13px;
+            padding: 9px 14px; border-radius: var(--radius-sm); border: 1px dashed var(--primary); height: 38px; box-sizing: border-box;
+        }
+        /* ================= END NEW PROJECT MODAL ================= */
+
         /* ANIMATED & REDESIGNED HIGH-END BUDGET ENGINE CONTROLLER */
         .budget-master-bar-vertical { 
             background: linear-gradient(135deg, #0f172a, #1e293b, #020617);
@@ -935,9 +949,9 @@
 </div>
 
 <div id="globalSettingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100001; justify-content:center; align-items:center;">
-    <div style="background:var(--card-bg); padding:30px; border-radius:16px; width:450px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border-top: 6px solid #4285F4;">
+    <div style="background:var(--card-bg); padding:30px; border-radius:16px; width:450px; max-height:88vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border-top: 6px solid #4285F4;">
         <h3 style="margin-top:0; color:#4285F4; border-bottom:2px solid var(--border-color); padding-bottom:12px; font-weight: 800; display:flex; align-items:center; gap:8px;">
-            <span style="background:#EA4335; color:white; border-radius:50%; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; font-size:14px;">⚙</span> Master Settings
+            <span style="background:#EA4335; color:white; border-radius:50%; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; font-size:14px;">⚙</span> Master Settings & Rates
         </h3>
         
         <div style="display:flex; flex-direction:column; gap:16px; margin-top:20px;">
@@ -957,65 +971,199 @@
                 <span style="color:var(--text-dark);">DMF/CESS/Stamp Qty Multiplier</span>
                 <input type="number" id="cfgRoyaltyConversionFactor" step="0.01" value="144" style="width:80px; padding:8px; border-radius:var(--radius-sm); border:1px solid #EA4335; background:var(--input-bg); color:var(--text-dark); font-weight:bold; text-align:center;" oninput="triggerPaymentSync(); triggerLiveAutoSave();">
             </label>
+
+            <div style="display:none;">
+            <div style="border-top:2px dashed var(--border-color); margin:6px 0 2px 0; padding-top:14px; font-weight:800; font-size:13px; color:var(--text-dark); display:flex; align-items:center; gap:6px;">📦 Default Royalty Factors (New Rows)</div>
+            <label style="display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:13px; background:var(--bg-main); padding:10px 14px; border-radius:8px; border:1px solid var(--border-color);">
+                <span style="color:var(--text-dark);">Default Sand Factor</span>
+                <input type="number" id="cfgDefaultSandFactor" step="0.001" value="0" style="width:80px; padding:8px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:bold; text-align:center;" oninput="triggerLiveAutoSave();">
+            </label>
+            <label style="display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:13px; background:var(--bg-main); padding:10px 14px; border-radius:8px; border:1px solid var(--border-color);">
+                <span style="color:var(--text-dark);">Default Grit Factor</span>
+                <input type="number" id="cfgDefaultGritFactor" step="0.001" value="0" style="width:80px; padding:8px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:bold; text-align:center;" oninput="triggerLiveAutoSave();">
+            </label>
+            <label style="display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:13px; background:var(--bg-main); padding:10px 14px; border-radius:8px; border:1px solid var(--border-color);">
+                <span style="color:var(--text-dark);">Default Stone Factor</span>
+                <input type="number" id="cfgDefaultStoneFactor" step="0.001" value="0" style="width:80px; padding:8px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:bold; text-align:center;" oninput="triggerLiveAutoSave();">
+            </label>
+            </div>
+
+            <div style="border-top:2px dashed var(--border-color); margin:6px 0 2px 0; padding-top:14px; font-weight:800; font-size:13px; color:var(--text-dark); display:flex; align-items:center; gap:6px;">💰 Deduction Percentages</div>
+            <label style="display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:13px; background:var(--bg-main); padding:10px 14px; border-radius:8px; border:1px solid var(--border-color);">
+                <span style="color:var(--text-dark);">DMF (%)</span>
+                <input type="number" id="cfgDmfPercent" step="0.01" value="15" style="width:80px; padding:8px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:bold; text-align:center;" oninput="triggerPaymentSync(); triggerLiveAutoSave();">
+            </label>
+            <label style="display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:13px; background:var(--bg-main); padding:10px 14px; border-radius:8px; border:1px solid var(--border-color);">
+                <span style="color:var(--text-dark);">CESS / COM (%)</span>
+                <input type="number" id="cfgComPercent" step="0.01" value="10" style="width:80px; padding:8px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:bold; text-align:center;" oninput="triggerPaymentSync(); triggerLiveAutoSave();">
+            </label>
+            <label style="display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:13px; background:var(--bg-main); padding:10px 14px; border-radius:8px; border:1px solid var(--border-color);">
+                <span style="color:var(--text-dark);">Stamp (%)</span>
+                <input type="number" id="cfgStampPercent" step="0.01" value="2" style="width:80px; padding:8px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:bold; text-align:center;" oninput="triggerPaymentSync(); triggerLiveAutoSave();">
+            </label>
         </div>
         
         <button onclick="closeSettings()" style="width:100%; padding:14px; background:#4285F4; color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; margin-top:24px; font-size:14px; transition:all 0.2s; box-shadow: 0 4px 6px rgba(66, 133, 244, 0.2);">Save & Close Panel</button>
     </div>
 </div>
 
-<!-- ===== COMBINED NEW PROJECT MODAL (Work Name + Bond No + Bill Identity Sequence) ===== -->
+<!-- ===== COMBINED NEW PROJECT MODAL (Work Name + Bond No + Bill Identity Sequence + Timeline) ===== -->
 <div id="newProjectModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100002; justify-content:center; align-items:center;">
-    <div style="background:var(--card-bg); padding:28px; border-radius:16px; width:480px; max-width:92vw; max-height:88vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border-top:6px solid var(--primary);">
-        <h3 style="margin-top:0; color:var(--primary); border-bottom:2px solid var(--border-color); padding-bottom:12px; font-weight:800; display:flex; align-items:center; gap:8px;">
-            <span style="background:#334155; color:white; border-radius:50%; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; font-size:14px;">➕</span> Add New Project
-        </h3>
+    <div style="background:var(--card-bg); padding:0; border-radius:18px; width:560px; max-width:92vw; max-height:90vh; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); display:flex; flex-direction:column;">
 
-        <div style="display:flex; flex-direction:column; gap:14px; margin-top:16px;">
-            <div>
-                <label style="font-weight:700; font-size:12px; color:var(--text-dark); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Name of Work / Project</label>
+        <div style="padding:22px 28px 16px 28px; border-bottom:1px solid var(--border-color); background:linear-gradient(135deg, var(--primary-light), transparent);">
+            <h3 style="margin:0; color:var(--text-dark); font-weight:800; font-size:17px; display:flex; align-items:center; gap:10px;">
+                <span style="background:var(--primary); color:white; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;">➕</span>
+                Add New Project
+            </h3>
+            <div style="font-size:11.5px; color:var(--text-light); margin-top:5px; margin-left:38px;">Saari details ek hi baar me bhar dein — baad me alag se dalne ki zaroorat nahi.</div>
+        </div>
+
+        <div style="padding:20px 28px 24px 28px; overflow-y:auto;">
+
+            <!-- SECTION: Project Identity -->
+            <div class="np-section-label">📁 Project Identity</div>
+            <div class="pp-field">
+                <label>Name of Work / Project</label>
                 <input type="text" id="npWorkName" placeholder="Enter full work / project name..." autocomplete="off"
-                    oninput="liveSearchExistingWorkNames()"
-                    style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:600; font-size:13px;">
-                <div id="npWorkNameSuggestions" style="display:none; margin-top:6px; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden; max-height:160px; overflow-y:auto;"></div>
-                <div id="npWorkNameHint" style="font-size:11px; color:var(--text-light); margin-top:4px;">Agar yeh work pehle se exist karta hai to neeche suggestion mein dikhega — usi par click karke seedha 2nd/next bill add kar sakte hain.</div>
+                    oninput="liveSearchExistingWorkNames()">
+                <div id="npWorkNameSuggestions" style="display:none; margin-top:2px; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden; max-height:160px; overflow-y:auto;"></div>
+                <div id="npWorkNameHint" style="font-size:10.5px; color:var(--text-light); font-weight:500; text-transform:none; letter-spacing:0;">Agar yeh work pehle se exist karta hai to suggestion mein dikhega — usi par click karke seedha next bill add kar sakte hain.</div>
             </div>
 
-            <div>
-                <label style="font-weight:700; font-size:12px; color:#8b5cf6; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Bond / Agreement No</label>
-                <input type="text" id="npBondNo" placeholder="e.g., 45/2025-26"
-                    style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:600; font-size:13px;">
+            <!-- SECTION: Bond Details -->
+            <div class="np-section-label">📜 Bond / Agreement Details</div>
+            <div class="pp-field-grid">
+                <div class="pp-field f-bondno">
+                    <label>Bond / Agreement No</label>
+                    <input type="text" id="npBondNo" placeholder="e.g., 45/2025-26" autocomplete="off" oninput="liveSearchExistingBondNo()">
+                    <div id="npBondNoSuggestions" style="display:none; margin-top:2px; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden; max-height:160px; overflow-y:auto;"></div>
+                </div>
+                <div class="pp-field f-bondamt">
+                    <label>Bond Amount (₹)</label>
+                    <input type="number" id="npBondAmount" placeholder="0.00">
+                </div>
             </div>
+            <div id="npBondNoHint" style="font-size:10.5px; color:var(--text-light); margin-top:6px;">Same Bond No dalte hi system automatically usi record ko detect karke next bill (2nd/3rd Running...) ke liye redirect kar dega. Agar us bond ka last bill FINAL tha to naya bill add nahi hoga.</div>
 
-            <div>
-                <label style="font-weight:700; font-size:12px; color:var(--text-dark); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Bill Identity Sequence</label>
-                <div style="display:flex; gap:8px;">
-                    <select id="npBillSequence" style="flex:1; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:600; font-size:13px;">
-                        <option value="1st">1st</option>
-                        <option value="2nd">2nd</option>
-                        <option value="3rd">3rd</option>
-                        <option value="4th">4th</option>
-                        <option value="5th">5th</option>
-                        <option value="6th">6th</option>
-                        <option value="7th">7th</option>
-                        <option value="8th">8th</option>
-                        <option value="9th">9th</option>
-                        <option value="10th">10th</option>
-                    </select>
-                    <select id="npBillType" style="flex:1; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:600; font-size:13px;">
+            <!-- SECTION: Bill Stage -->
+            <div class="np-section-label">🧾 Bill Stage</div>
+            <div class="pp-field-grid">
+                <div class="pp-field">
+                    <label>Bill Identity Sequence <span style="text-transform:none; font-weight:500;">(auto)</span></label>
+                    <div class="np-seq-badge" id="npBillSequenceBadge">🔒 1st Bill</div>
+                    <input type="hidden" id="npBillSequence" value="1st">
+                </div>
+                <div class="pp-field">
+                    <label>Bill Type</label>
+                    <select id="npBillType">
                         <option value="Running">Running</option>
                         <option value="Final">Final</option>
                     </select>
                 </div>
             </div>
+
+            <!-- SECTION: Timeline -->
+            <div class="np-section-label">🗓️ Project Timeline</div>
+            <div class="pp-field-grid">
+                <div class="pp-field">
+                    <label>Date of Start</label>
+                    <input type="date" id="npDateStart">
+                </div>
+                <div class="pp-field">
+                    <label>Date of Completion</label>
+                    <input type="date" id="npDateCompletion">
+                </div>
+                <div class="pp-field f-meas">
+                    <label>Date of Measurement</label>
+                    <input type="date" id="npDateMeasurement">
+                </div>
+            </div>
+
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:24px;">
+        <div style="display:flex; gap:10px; padding:18px 28px; border-top:1px solid var(--border-color); background:var(--bg-main);">
             <button onclick="closeNewProjectModal()" style="flex:1; padding:12px; background:var(--neutral-light); color:var(--text-dark); border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px;">Cancel</button>
             <button onclick="submitNewProjectForm()" style="flex:2; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px; box-shadow:0 4px 6px rgba(37,99,235,0.2);">➕ Create Project</button>
         </div>
     </div>
 </div>
 <!-- ===== END COMBINED NEW PROJECT MODAL ===== -->
+
+<!-- ===== NEW BILL MODAL (replaces native prompt/confirm — avoids browser dialog-suppression issues) ===== -->
+<div id="newBillModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100003; justify-content:center; align-items:center;">
+    <div style="background:var(--card-bg); padding:28px; border-radius:16px; width:380px; max-width:90vw; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border-top:6px solid #34A853;">
+        <h3 style="margin:0 0 4px 0; font-size:17px; color:var(--text-dark);">🔁 Add Next Bill</h3>
+        <div id="newBillModalInfo" style="font-size:12px; color:var(--text-light); margin-bottom:16px; line-height:1.6;"></div>
+
+        <label style="font-weight:700; font-size:12px; color:var(--text-dark); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Bill Sequence <span style="color:var(--text-light); text-transform:none; font-weight:500;">(auto-generated — already-used sequences can't be repeated)</span></label>
+        <select id="nbSeqSelect" disabled style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--neutral-light); color:var(--text-dark); font-weight:700; font-size:13px; margin-bottom:14px; cursor:not-allowed;">
+            <option value="1st">1st</option>
+            <option value="2nd">2nd</option>
+            <option value="3rd">3rd</option>
+            <option value="4th">4th</option>
+            <option value="5th">5th</option>
+            <option value="6th">6th</option>
+            <option value="7th">7th</option>
+            <option value="8th">8th</option>
+            <option value="9th">9th</option>
+            <option value="10th">10th</option>
+        </select>
+
+        <label style="font-weight:700; font-size:12px; color:var(--text-dark); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Bill Type</label>
+        <select id="nbTypeSelect" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:600; font-size:13px; margin-bottom:20px;">
+            <option value="Running">Running</option>
+            <option value="Final">Final</option>
+        </select>
+
+        <div style="display:flex; gap:10px;">
+            <button onclick="document.getElementById('newBillModal').style.display='none';" style="flex:1; padding:12px; background:var(--neutral-light); color:var(--text-dark); border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px;">Cancel</button>
+            <button onclick="confirmNewBillCreation()" style="flex:2; padding:12px; background:#34A853; color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px; box-shadow:0 4px 6px rgba(52,168,83,0.25);">✅ Confirm & Create</button>
+        </div>
+    </div>
+</div>
+<!-- ===== END NEW BILL MODAL ===== -->
+
+<!-- ===== BILL HISTORY MODAL ===== -->
+<div id="billHistoryModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100003; justify-content:center; align-items:center;">
+    <div style="background:var(--card-bg); border-radius:18px; width:640px; max-width:94vw; max-height:88vh; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border-top:6px solid #6366f1; display:flex; flex-direction:column; overflow:hidden;">
+        <div style="padding:22px 26px 16px 26px; border-bottom:1px solid var(--border-color); background:linear-gradient(135deg, rgba(99,102,241,0.08), transparent);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                    <h3 style="margin:0; font-size:18px; color:var(--text-dark); display:flex; align-items:center; gap:8px;">📜 Bill History</h3>
+                    <div id="billHistoryInfo" style="font-size:12px; color:var(--text-light); margin-top:6px;"></div>
+                </div>
+                <button onclick="document.getElementById('billHistoryModal').style.display='none';" style="background:var(--neutral-light); border:none; width:30px; height:30px; border-radius:50%; font-size:15px; cursor:pointer; color:var(--text-dark); flex-shrink:0;">✖</button>
+            </div>
+        </div>
+        <div id="billHistoryBody" style="overflow-y:auto; padding:16px 20px 22px 20px; display:flex; flex-direction:column; gap:10px;"></div>
+    </div>
+</div>
+<!-- ===== END BILL HISTORY MODAL ===== -->
+
+<!-- ===== BILL DETAIL VIEWER MODAL (full read-only view of a past bill) ===== -->
+<div id="billDetailModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:100004; justify-content:center; align-items:center;">
+    <div style="background:var(--card-bg); padding:26px; border-radius:16px; width:820px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border-top:6px solid #6366f1;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h3 id="billDetailTitle" style="margin:0; font-size:17px; color:var(--text-dark);">Bill Detail</h3>
+            <button onclick="document.getElementById('billDetailModal').style.display='none';" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-light);">✖</button>
+        </div>
+        <div id="billDetailContent"></div>
+    </div>
+</div>
+<!-- ===== END BILL DETAIL VIEWER MODAL ===== -->
+
+<!-- ===== GENERIC CONFIRM MODAL (replaces native confirm() — avoids browser dialog-suppression issues) ===== -->
+<div id="genericConfirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:100005; justify-content:center; align-items:center;">
+    <div style="background:var(--card-bg); padding:26px; border-radius:16px; width:400px; max-width:92vw; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border-top:6px solid #f59e0b;">
+        <div id="genericConfirmMessage" style="font-size:13px; color:var(--text-dark); line-height:1.6; margin-bottom:20px; white-space:pre-line;"></div>
+        <div style="display:flex; gap:10px;">
+            <button onclick="_genericConfirmNo()" style="flex:1; padding:12px; background:var(--neutral-light); color:var(--text-dark); border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px;">Cancel</button>
+            <button onclick="_genericConfirmYes()" style="flex:1; padding:12px; background:#f59e0b; color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px;">✅ Continue</button>
+        </div>
+    </div>
+</div>
+<!-- ===== END GENERIC CONFIRM MODAL ===== -->
 
 <div class="container">
     <h2>BILLING AND PAYMENT ENGINE</h2>
@@ -1089,7 +1237,8 @@
 
                         <div class="pp-bar-right">
                             <button class="btn-pm btn-pm-new" onclick="openNewProjectModal()">➕ New Project</button>
-                            <button class="btn-pm btn-pm-bill" onclick="newBillSameProject()" title="Same project ka naya bill — Bill Sequence badlega">🔁 New Bill</button>
+                            <button class="btn-pm btn-pm-bill" id="btnNewBillSameProject" onclick="newBillSameProject()" title="Same project ka naya bill — Bill Sequence badlega">🔁 New Bill</button>
+                            <button class="btn-pm" style="background:#6366f1; color:white; border:1px solid #4f46e5; font-weight:700;" onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'" onclick="openBillHistoryModal()" title="Is bond/work ke purane bills ka record dekhein">📜 Bill History</button>
                             <button class="btn-pm btn-pm-delete" onclick="deleteCurrentProject()">✖ Delete</button>
 
                             <div id="autosaveBadge" class="autosave-status-badge synced">✓ System Synced</div>
@@ -1122,9 +1271,9 @@
 
                         <div class="pp-field-grid">
                             <div class="pp-field">
-                                <label>Bill Identity Sequence</label>
+                                <label>Bill Identity Sequence <span style="color:var(--text-light); text-transform:none; font-weight:500; font-size:10px;">(system auto-managed — locked)</span></label>
                                 <div class="pp-bill-pair">
-                                    <select id="globalBillSequence" onchange="triggerLiveAutoSave(); triggerPaymentSync(); toggleLastPaidDateVisibility(); updateMultiBillLedgerView();">
+                                    <select id="globalBillSequence" disabled title="Bill Identity Sequence sirf system automatically set karta hai — manually badla nahi ja sakta." style="background:var(--neutral-light); cursor:not-allowed; opacity:0.85;" onchange="triggerLiveAutoSave(); triggerPaymentSync(); toggleLastPaidDateVisibility(); updateMultiBillLedgerView();">
                                         <option value="1st">1st</option>
                                         <option value="2nd">2nd</option>
                                         <option value="3rd">3rd</option>
@@ -1177,24 +1326,6 @@
                 </div>
 
                 <div class="exec-dash-wrap">
-
-                    <!-- Identity hero strip -->
-                    <div class="exec-hero">
-                        <div class="exec-hero-left">
-                            <div class="exec-hero-eyebrow">📋 Active Work Plan</div>
-                            <div class="exec-hero-title" id="dashWorkName">None</div>
-                            <div class="exec-hero-meta">
-                                <div class="exec-hero-meta-item">
-                                    <span class="exec-hero-meta-label">Bond / Agreement No</span>
-                                    <span class="exec-hero-meta-value" id="dashBondNo">-</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="exec-hero-badge">
-                            <div class="exec-hero-badge-label">Active Bill Sequence</div>
-                            <div class="exec-hero-badge-value" id="dashBillCycle">1st Running Bill</div>
-                        </div>
-                    </div>
 
                     <!-- KPI tiles -->
                     <div class="exec-kpi-grid">
@@ -1360,6 +1491,7 @@
                     </label>
 
                     <div class="tab-action-toolbar-right">
+                        <button id="btnSaveUpdateBillAbstract" class="btn-pm" style="display:none; background:#059669; color:white; border:1px solid #047857; font-weight:700;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'" onclick="updateCurrentBillHistoryRecord()" title="Is bill ke latest changes ko History me save/update karein">💾 Save/Update Bill</button>
                         <button class="btn-clear" onclick="saveState(); clearTab('tab2');">Clear Data</button>
                         <button class="btn-excel" onclick="exportToExcel('abstractTable', 'Bill_Abstract')">📊 Excel Export</button>
                         <button class="btn-print" onclick="window.print()">🖨️ Print Sheet</button>
@@ -1515,7 +1647,7 @@
                         <div class="grand-royalty-checkbox-header">
                             <label for="manualDeductCheckbox">
                                 <input type="checkbox" id="manualDeductCheckbox" onchange="toggleManualDeductOverride()">
-                                Enable Manual Last Bill Royalty Deduction Override
+                                Enable Manual Royalty Deduction
                             </label>
                         </div>
                         <div class="grand-royalty-three-tier-grid">
@@ -1527,7 +1659,7 @@
                                 </div>
                             </div>
                             <div class="tier-card">
-                                <div class="tier-label">Last Bill Royalty Deduction</div>
+                                <div class="tier-label">Last/Current Royalty Deduction</div>
                                 <div class="tier-value-display">
                                     <span class="tier-currency" style="color: #f97316;">₹</span>
                                     <input type="number" id="txtLastBillDeductGrand" class="tier-input-field" value="0.00" step="0.01" disabled onfocus="saveState()" oninput="calculateNetRoyaltyV7(); triggerLiveAutoSave();">
@@ -1872,6 +2004,15 @@
     };
 
     let undoStack = [];
+    // True only while a bill pulled OUT of Bill History (via editBillHistoryEntry) is being actively
+    // edited. Controls visibility of the "Save/Update Bill" button in the Bill Abstract tab — that
+    // button should only appear during an actual history-edit session, not during normal fresh billing.
+    let isEditingHistoryBill = false;
+
+    function updateSaveUpdateBillButtonVisibility() {
+        let btn = document.getElementById('btnSaveUpdateBillAbstract');
+        if (btn) btn.style.display = isEditingHistoryBill ? 'inline-flex' : 'none';
+    }
     const MAX_UNDO_LIMIT = 25;
     let autoSaveTimeout = null;
 
@@ -1902,6 +2043,18 @@
             wrapper.style.display = "none";
             if (dashWrapper) dashWrapper.style.display = "none";
             document.getElementById('globalLastBillPaymentDate').value = "";
+        }
+
+        // Lock "New Bill" button once this bond/work's bill has been marked Final
+        // NOTE: we do NOT set .disabled = true here — a disabled button silently blocks the
+        // click event entirely, so the user gets no feedback at all. We only dim it visually
+        // and let newBillSameProject() itself show a clear toast message when blocked.
+        let newBillBtn = document.getElementById('btnNewBillSameProject');
+        if (newBillBtn) {
+            let isFinal = document.getElementById('globalBillType').value === 'Final';
+            newBillBtn.style.opacity = isFinal ? '0.5' : '1';
+            newBillBtn.style.cursor = isFinal ? 'not-allowed' : 'pointer';
+            newBillBtn.title = isFinal ? 'Final Bill submit ho chuka hai — is bond/work par aur koi bill add nahi kiya ja sakta' : 'Same project ka naya bill — Bill Sequence badlega';
         }
     }
 
@@ -1969,14 +2122,14 @@
         let backupData = {};
         for (let i = 0; i < _ls.length(); i++) {
             let key = _ls.key(i);
-            if (key.startsWith('rwd_billing_v12_master') || key === 'rwd_projects_index' || key === 'rwd_active_project') {
+            if (key.startsWith('rwd_billing_v12_master') || key.startsWith('rwd_bill_history') || key === 'rwd_projects_index' || key === 'rwd_active_project') {
                 backupData[key] = _ls.get(key);
             }
         }
         let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
         let downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "Pavnesh_System_Portfolio_Backup.json");
+        downloadAnchor.setAttribute("download", "QUANTIX_System_Portfolio_Backup.json");
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
@@ -2088,10 +2241,7 @@
         let net = parseFloat(document.getElementById('lblActualNetPayableContractor').innerText) || 0;
         let bondAmt = parseFloat(document.getElementById('globalBondAmount').value) || 0;
 
-        document.getElementById('dashWorkName').innerText = document.getElementById('globalWorkName').value || "Unnamed Scheme Row";
-        document.getElementById('dashBondNo').innerText = document.getElementById('globalWorkName').value ? document.getElementById('globalBondNo').value : "-";
         document.getElementById('dashBondAmount').innerText = bondAmt.toLocaleString('en-IN');
-        document.getElementById('dashBillCycle').innerText = document.getElementById('globalBillSequence').value + " " + document.getElementById('globalBillType').value + " Bill";
         document.getElementById('dashGrossBill').innerText = gross.toLocaleString('en-IN');
         document.getElementById('dashDeducts').innerText = deducts.toLocaleString('en-IN');
         document.getElementById('dashNetCash').innerText = net.toLocaleString('en-IN');
@@ -2174,7 +2324,7 @@
 
     // Creates a brand-new project using details already collected (Work Name, Bond No, Bill Sequence/Type)
     // via the combined "Add New Project" modal — no further prompts needed.
-    async function createNewProjectWithDetails(projName, workName, bondNo, billSeq, billType) {
+    async function createNewProjectWithDetails(projName, workName, bondNo, billSeq, billType, bondAmount, dateStart, dateCompletion, dateMeasurement) {
         let list = getProjectsList();
         if(list.includes(projName)) {
             alert("इस नाम का प्रोजेक्ट पहले से ही मौजूद है!");
@@ -2187,10 +2337,10 @@
         
         document.getElementById('globalWorkName').value = workName || '';
         document.getElementById('globalBondNo').value = bondNo || '';
-        document.getElementById('globalBondAmount').value = '';
-        document.getElementById('globalDateStart').value = '';
-        document.getElementById('globalDateCompletion').value = '';
-        document.getElementById('globalDateMeasurement').value = '';
+        document.getElementById('globalBondAmount').value = bondAmount || '';
+        document.getElementById('globalDateStart').value = dateStart || '';
+        document.getElementById('globalDateCompletion').value = dateCompletion || '';
+        document.getElementById('globalDateMeasurement').value = dateMeasurement || '';
         document.getElementById('globalLastBillPaymentDate').value = '';
         
         document.getElementById('globalBillSequence').value = billSeq || '1st';
@@ -2203,6 +2353,12 @@
         document.getElementById('cfgSettingGST').value = '18';
         document.getElementById('cfgSettingRoyalty').value = '252';
         document.getElementById('cfgRoyaltyConversionFactor').value = '144';
+        document.getElementById('cfgDefaultSandFactor').value = '0';
+        document.getElementById('cfgDefaultGritFactor').value = '0';
+        document.getElementById('cfgDefaultStoneFactor').value = '0';
+        document.getElementById('cfgDmfPercent').value = '15';
+        document.getElementById('cfgComPercent').value = '10';
+        document.getElementById('cfgStampPercent').value = '2';
         
         document.getElementById('lastOverallRoyaltyQty').value = '0.00';
         document.getElementById('chkEnableOverallCalc').checked = false;
@@ -2251,6 +2407,10 @@
         document.getElementById('npBondNo').value = '';
         document.getElementById('npBillSequence').value = '1st';
         document.getElementById('npBillType').value = 'Running';
+        document.getElementById('npBondAmount').value = '';
+        document.getElementById('npDateStart').value = '';
+        document.getElementById('npDateCompletion').value = '';
+        document.getElementById('npDateMeasurement').value = '';
         document.getElementById('npWorkNameSuggestions').style.display = 'none';
         document.getElementById('npWorkNameSuggestions').innerHTML = '';
         document.getElementById('newProjectModal').style.display = 'flex';
@@ -2310,6 +2470,44 @@
         box.style.display = 'block';
     }
 
+    // Live search-as-you-type by BOND NUMBER: auto-detects the same bond and routes to next bill.
+    // If the matched record's last bill was Final, it is shown locked (no further bill allowed).
+    function liveSearchExistingBondNo() {
+        let query = document.getElementById('npBondNo').value.trim().toLowerCase();
+        let box = document.getElementById('npBondNoSuggestions');
+        if(!query) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+        let matches = getAllProjectWorkRecords().filter(r => r.bondNo && r.bondNo.trim().toLowerCase().includes(query));
+
+        if(matches.length === 0) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+        box.innerHTML = matches.map(r => {
+            let isFinal = (r.billType === 'Final');
+            if(isFinal) {
+                return `
+                <div style="padding:10px 12px; border-bottom:1px solid var(--border-color); background:var(--card-bg);">
+                    <div style="font-weight:700; font-size:12.5px; color:var(--text-dark);">${r.workName}</div>
+                    <div style="font-size:11px; color:var(--text-light); margin-top:2px;">
+                        Bond: ${r.bondNo || '—'} &nbsp;|&nbsp; Last Bill: ${r.billSequence} ${r.billType}
+                        &nbsp;|&nbsp; <span style="color:#EA4335; font-weight:700;">🔒 Final Bill submitted — no further bills allowed</span>
+                    </div>
+                </div>`;
+            }
+            return `
+                <div onclick="useExistingWorkForNextBill('${r.projKey.replace(/'/g, "\\'")}')"
+                    style="padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border-color); background:var(--card-bg); transition:background 0.15s;"
+                    onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='var(--card-bg)'">
+                    <div style="font-weight:700; font-size:12.5px; color:var(--text-dark);">${r.workName}</div>
+                    <div style="font-size:11px; color:var(--text-light); margin-top:2px;">
+                        Bond: ${r.bondNo || '—'} &nbsp;|&nbsp; Current Bill: ${r.billSequence} ${r.billType}
+                        &nbsp;|&nbsp; <span style="color:var(--primary); font-weight:700;">Click to add next bill →</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        box.style.display = 'block';
+    }
+
     // Same work found via search — switch to it and roll forward to the next bill (e.g. 2nd bill)
     // instead of creating a duplicate project.
     async function useExistingWorkForNextBill(projKey) {
@@ -2326,6 +2524,10 @@
         let bondNo = document.getElementById('npBondNo').value.trim();
         let billSeq = document.getElementById('npBillSequence').value;
         let billType = document.getElementById('npBillType').value;
+        let bondAmount = document.getElementById('npBondAmount').value;
+        let dateStart = document.getElementById('npDateStart').value;
+        let dateCompletion = document.getElementById('npDateCompletion').value;
+        let dateMeasurement = document.getElementById('npDateMeasurement').value;
 
         if(!workName) { showToast('Work Name dalna zaroori hai!'); return; }
 
@@ -2337,10 +2539,22 @@
             }
         }
 
+        // Safety check: if this Bond No already exists against another work, detect it automatically
+        let bondMatch = bondNo ? getAllProjectWorkRecords().find(r => r.bondNo && r.bondNo.trim().toLowerCase() === bondNo.toLowerCase()) : null;
+        if(!exactMatch && bondMatch) {
+            if(bondMatch.billType === 'Final') {
+                showToast('⛔ Ye Bond No "' + bondNo + '" pehle se "' + bondMatch.workName + '" ke against FINAL bill ke saath band ho chuka hai. Isi bond par naya bill/project nahi banaya ja sakta.');
+                return;
+            }
+            if(!confirm('Bond No "' + bondNo + '" pehle se "' + bondMatch.workName + '" project ke against register hai (Current Bill: ' + bondMatch.billSequence + ' ' + bondMatch.billType + ').\n\nKya aap fir bhi isi Bond No ke saath ek ALAG naya project banana chahte hain?\n\n(Cancel karke upar Bond No suggestion list se select karen — to seedha next bill add ho jayega usi record me.)')) {
+                return;
+            }
+        }
+
         let projName = workName.trim().toLowerCase().replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_");
         if(!projName) { showToast('Valid Work Name dalein!'); return; }
 
-        let ok = await createNewProjectWithDetails(projName, workName, bondNo, billSeq, billType);
+        let ok = await createNewProjectWithDetails(projName, workName, bondNo, billSeq, billType, bondAmount, dateStart, dateCompletion, dateMeasurement);
         if(ok) closeNewProjectModal();
     }
     // ========== END COMBINED NEW PROJECT MODAL ==========
@@ -2359,6 +2573,7 @@
             saveProjectsList(list);
             
             let cleanDeleteSuffix = currentName.trim().toLowerCase().replace(/[^a-zA-Z0-9_]/g, ""); _ls.remove('rwd_billing_v12_master_' + cleanDeleteSuffix);
+            _ls.remove('rwd_bill_history_' + cleanDeleteSuffix);
             _ls.set('rwd_active_project', 'default');
             
             await initProjectDropdown();
@@ -2391,6 +2606,12 @@
             gstRate: document.getElementById('cfgSettingGST').value,
             masterRoyRate: document.getElementById('cfgSettingRoyalty').value,
             royaltyConvFactor: document.getElementById('cfgRoyaltyConversionFactor').value,
+            defSandFactor: document.getElementById('cfgDefaultSandFactor').value,
+            defGritFactor: document.getElementById('cfgDefaultGritFactor').value,
+            defStoneFactor: document.getElementById('cfgDefaultStoneFactor').value,
+            dmfPercent: document.getElementById('cfgDmfPercent').value,
+            comPercent: document.getElementById('cfgComPercent').value,
+            stampPercent: document.getElementById('cfgStampPercent').value,
             lastOverallRoyaltyQtyVal: document.getElementById('lastOverallRoyaltyQty').value,
             chkEnableOverallCalcVal: document.getElementById('chkEnableOverallCalc').checked,
             rDeducts: [document.getElementById('deductSand').value, document.getElementById('deductGrit').value, document.getElementById('deductStone').value],
@@ -2489,6 +2710,12 @@
         
         document.getElementById('cfgSettingRoyalty').value = dataObj.masterRoyRate || '252';
         document.getElementById('cfgRoyaltyConversionFactor').value = dataObj.royaltyConvFactor || '144';
+        document.getElementById('cfgDefaultSandFactor').value = dataObj.defSandFactor || '0';
+        document.getElementById('cfgDefaultGritFactor').value = dataObj.defGritFactor || '0';
+        document.getElementById('cfgDefaultStoneFactor').value = dataObj.defStoneFactor || '0';
+        document.getElementById('cfgDmfPercent').value = dataObj.dmfPercent || '15';
+        document.getElementById('cfgComPercent').value = dataObj.comPercent || '10';
+        document.getElementById('cfgStampPercent').value = dataObj.stampPercent || '2';
         
         document.getElementById('lastOverallRoyaltyQty').value = dataObj.lastOverallRoyaltyQtyVal || '0.00';
         document.getElementById('chkEnableOverallCalc').checked = dataObj.chkEnableOverallCalcVal || false;
@@ -3094,9 +3321,12 @@
     function addSingleRowTab3(vals = null) {
         let tableBody = document.querySelector('#royaltyTable tbody'), rowCount = tableBody ? tableBody.rows.length : 0, newRow = document.createElement('tr');
         let itemQty = vals ? vals.itemQty : '';
-        let sandFactor = vals ? vals.sandFactor : '';
-        let gritFactor = vals ? vals.gritFactor : '';
-        let stoneFactor = vals ? vals.stoneFactor : '';
+        let defSand = document.getElementById('cfgDefaultSandFactor') ? document.getElementById('cfgDefaultSandFactor').value : '';
+        let defGrit = document.getElementById('cfgDefaultGritFactor') ? document.getElementById('cfgDefaultGritFactor').value : '';
+        let defStone = document.getElementById('cfgDefaultStoneFactor') ? document.getElementById('cfgDefaultStoneFactor').value : '';
+        let sandFactor = vals ? vals.sandFactor : defSand;
+        let gritFactor = vals ? vals.gritFactor : defGrit;
+        let stoneFactor = vals ? vals.stoneFactor : defStone;
         
         newRow.innerHTML = `<td class="sno">${rowCount + 1}</td>
             <td><input type="number" step="0.01" class="r-item-qty" value="${itemQty}" onfocus="saveState()" oninput="calculateTab3(this)"></td>
@@ -3445,9 +3675,13 @@
         let qtyMultiplier = parseFloat(document.getElementById('cfgRoyaltyConversionFactor').value) || 144;
         let royaltyQtyBase = totalQtyForRoyalty * qtyMultiplier;
         
-        let dmfAuto = royaltyQtyBase * 0.15;
-        let comAuto = royaltyQtyBase * 0.10;
-        let stampAuto = royaltyQtyBase * 0.02;
+        let dmfPercent = parseFloat(document.getElementById('cfgDmfPercent').value) || 0;
+        let comPercent = parseFloat(document.getElementById('cfgComPercent').value) || 0;
+        let stampPercent = parseFloat(document.getElementById('cfgStampPercent').value) || 0;
+        
+        let dmfAuto = royaltyQtyBase * (dmfPercent / 100);
+        let comAuto = royaltyQtyBase * (comPercent / 100);
+        let stampAuto = royaltyQtyBase * (stampPercent / 100);
 
         document.getElementById('pDmfAuto').innerText = formatWorkAbstractField(dmfAuto);
         document.getElementById('pComAuto').innerText = formatWorkAbstractField(comAuto);
@@ -3689,6 +3923,300 @@
         return currentActive === 'default' ? '' : '_' + currentActive;
     }
 
+    // ===== Generic custom confirm modal (replaces native confirm() everywhere in history features) =====
+    let _pendingConfirmCallback = null;
+    function showConfirmModal(message, onYes) {
+        document.getElementById('genericConfirmMessage').innerText = message;
+        _pendingConfirmCallback = onYes;
+        document.getElementById('genericConfirmModal').style.display = 'flex';
+    }
+    function _genericConfirmYes() {
+        document.getElementById('genericConfirmModal').style.display = 'none';
+        let cb = _pendingConfirmCallback;
+        _pendingConfirmCallback = null;
+        if (cb) cb();
+    }
+    function _genericConfirmNo() {
+        document.getElementById('genericConfirmModal').style.display = 'none';
+        _pendingConfirmCallback = null;
+    }
+
+    // ===== BILL HISTORY (record of every past bill, per bond/project) =====
+    function getBillHistory() {
+        try { return JSON.parse(_ls.get('rwd_bill_history' + getActiveProjectSuffix()) || '[]'); } catch(e) { return []; }
+    }
+
+    // Fields that describe the PROJECT/BOND as a whole rather than one specific bill — these must
+    // always be identical across every bill of the same bond, so whenever they change on any one
+    // bill (live edit or an edited history entry being re-saved), they get pushed into every other
+    // bill's stored history record automatically. Per-bill fields (sequence, type, measurements,
+    // computed amounts, manual overrides) are intentionally NOT in this list and are left untouched.
+    const SHARED_PROJECT_FIELDS = [
+        'workName', 'bondNo', 'bondAmount', 'dateStart', 'dateCompletion',
+        'sanctionedAmt', 'releasedAmt', 'availFund',
+        'gstRate', 'masterRoyRate', 'royaltyConvFactor',
+        'defSandFactor', 'defGritFactor', 'defStoneFactor',
+        'dmfPercent', 'comPercent', 'stampPercent', 'contractorType'
+    ];
+
+    // Pushes this bill's shared/master project fields into every OTHER stored bill-history record
+    // (both the lightweight display fields and the embedded fullData snapshot), so corrections made
+    // while editing any single bill automatically reflect across the entire bond's bill history.
+    function syncSharedFieldsAcrossHistory(hist, sourceSnapshot) {
+        if (!sourceSnapshot.fullData) return;
+        let srcData;
+        try { srcData = JSON.parse(sourceSnapshot.fullData); } catch(e) { return; }
+
+        hist.forEach(h => {
+            if (h.seq === sourceSnapshot.seq) return; // this is the record we just saved — skip
+
+            h.workName = srcData.workName;
+            h.bondNo = srcData.bondNo;
+
+            if (h.fullData) {
+                try {
+                    let fd = JSON.parse(h.fullData);
+                    SHARED_PROJECT_FIELDS.forEach(key => { fd[key] = srcData[key]; });
+                    h.fullData = JSON.stringify(fd);
+                } catch(e) { /* corrupt/legacy record — leave it as-is */ }
+            }
+        });
+    }
+
+    function saveBillHistorySnapshot(snapshot) {
+        let hist = getBillHistory();
+        // Upsert by sequence: if a record for this bill sequence already exists, update it in place
+        // (this is what makes "Edit → Save" correctly refresh the existing history entry instead of duplicating it).
+        let existingIdx = hist.findIndex(h => h.seq === snapshot.seq);
+        if (existingIdx !== -1) {
+            hist[existingIdx] = snapshot;
+        } else {
+            hist.push(snapshot);
+        }
+
+        // Auto-sync shared project fields into every other bill in history.
+        syncSharedFieldsAcrossHistory(hist, snapshot);
+
+        _ls.set('rwd_bill_history' + getActiveProjectSuffix(), JSON.stringify(hist));
+    }
+
+    function openBillHistoryModal() {
+        let hist = getBillHistory();
+        let workName = document.getElementById('globalWorkName').value || 'This Project';
+        let bondNo = document.getElementById('globalBondNo').value || '(no bond no)';
+        document.getElementById('billHistoryInfo').innerHTML = '<b style="color:var(--text-dark);">' + workName + '</b> &nbsp;•&nbsp; Bond No: <b style="color:var(--text-dark);">' + bondNo + '</b> &nbsp;•&nbsp; ' + hist.length + ' bill' + (hist.length === 1 ? '' : 's') + ' saved';
+
+        let body = document.getElementById('billHistoryBody');
+        if(hist.length === 0) {
+            body.innerHTML = `<div style="padding:40px 16px; text-align:center; color:var(--text-light);">
+                <div style="font-size:34px; margin-bottom:10px;">📭</div>
+                <div style="font-size:13px;">Abhi tak koi purana bill record nahi hai — jaise hi "New Bill" se agla bill banayenge, is bill ka record yahan save ho jayega.</div>
+            </div>`;
+        } else {
+            let allSeq = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
+            // Display in chronological (sequence) order, but keep each row's ORIGINAL array index
+            // for the action buttons, since editBillHistoryEntry/deleteBillHistoryEntry/viewBillHistoryDetail
+            // operate on the actual stored index, not the sorted display position.
+            let sortedEntries = hist.map((h, originalIdx) => ({ h, originalIdx }))
+                .sort((a, b) => allSeq.indexOf(a.h.seq) - allSeq.indexOf(b.h.seq));
+
+            body.innerHTML = sortedEntries.map(({h, originalIdx}) => {
+                let isFinal = h.type === 'Final';
+                let fmt2 = (v) => (v||0).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+                return `
+                <div style="border:1px solid var(--border-color); border-radius:12px; padding:14px 16px; background:var(--bg-main); transition:box-shadow 0.15s, border-color 0.15s;"
+                     onmouseover="this.style.boxShadow='0 4px 14px rgba(0,0,0,0.08)'; this.style.borderColor='#6366f1';"
+                     onmouseout="this.style.boxShadow='none'; this.style.borderColor='var(--border-color)';">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="background:${isFinal ? '#ef4444' : '#6366f1'}; color:white; font-weight:800; font-size:11px; padding:5px 10px; border-radius:20px; letter-spacing:0.3px; white-space:nowrap;">${h.seq} ${h.type}</span>
+                            <span style="font-size:11px; color:var(--text-light);">🗓️ ${h.date || '-'}</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:10px; color:var(--text-light); text-transform:uppercase; letter-spacing:0.5px;">Net Payable</div>
+                            <div style="font-size:16px; font-weight:800; color:#059669;">₹ ${fmt2(h.netPayable)}</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:18px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-color); font-size:11.5px; color:var(--text-light);">
+                        <span>Gross: <b style="color:var(--text-dark);">₹ ${fmt2(h.gross)}</b></span>
+                        <span>Deductions: <b style="color:var(--text-dark);">₹ ${fmt2(h.totalDeductions)}</b></span>
+                    </div>
+
+                    <div style="display:flex; gap:8px; margin-top:12px;">
+                        <button onclick="viewBillHistoryDetail(${originalIdx})" style="flex:1; background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; border-radius:8px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">👁 View</button>
+                        <button onclick="editBillHistoryEntry(${originalIdx})" style="flex:1; background:#fffbeb; color:#b45309; border:1px solid #fde68a; border-radius:8px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">✏️ Edit</button>
+                        <button onclick="deleteBillHistoryEntry(${originalIdx})" style="flex:1; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:8px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">✖ Remove</button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+        document.getElementById('billHistoryModal').style.display = 'flex';
+    }
+
+    function deleteBillHistoryEntry(idx) {
+        showConfirmModal('Is bill record ko history se hatana hai?', () => {
+            let hist = getBillHistory();
+            hist.splice(idx, 1);
+            _ls.set('rwd_bill_history' + getActiveProjectSuffix(), JSON.stringify(hist));
+            openBillHistoryModal();
+        });
+    }
+
+    // Lets the user explicitly save/update the CURRENTLY open bill's record in Bill History —
+    // used especially after editing a bill pulled back from history (via "Edit"), so the change
+    // reflects there instead of only in the live form. Safe to use anytime (upserts by sequence).
+    async function updateCurrentBillHistoryRecord() {
+        let curSeq  = document.getElementById('globalBillSequence').value;
+        let curType = document.getElementById('globalBillType').value;
+        showConfirmModal(
+            '"' + curSeq + ' ' + curType + ' Bill" ka latest data Bill History me save/update karna hai.\n\nContinue karein?',
+            async () => {
+                await snapshotCurrentBillToHistory();
+                showToast('💾 ' + curSeq + ' ' + curType + ' Bill History me update ho gaya!');
+            }
+        );
+    }
+
+    // Pulls a past bill OUT of history and loads it fully back into the live editable system
+    // (all tabs: Measurement, Bill Abstract, Royalty, Payment Summary + Bill Sequence/Type).
+    // The bill currently open is first safely archived into history so nothing is lost.
+    async function editBillHistoryEntry(idx) {
+        let hist = getBillHistory();
+        let target = hist[idx];
+        if (!target) return;
+
+        if (!target.fullData) {
+            showToast('⚠️ Is bill ka poora data save nahi mila (purana/lightweight record hai) — edit nahi kiya ja sakta.');
+            return;
+        }
+
+        let curSeq  = document.getElementById('globalBillSequence').value;
+        let curType = document.getElementById('globalBillType').value;
+
+        showConfirmModal(
+            '"' + target.seq + ' ' + target.type + ' Bill" ko EDIT mode me kholna hai.\n\n' +
+            'Aapka abhi ka open bill ("' + curSeq + ' ' + curType + '") automatically Bill History me safely save ho jayega, taaki uska data na khoye.\n\n' +
+            'Continue karein?',
+            async () => {
+                document.getElementById('billHistoryModal').style.display = 'none';
+                document.getElementById('billDetailModal').style.display = 'none';
+
+                // 1) Archive the currently open bill into history first (so it's never lost)
+                await snapshotCurrentBillToHistory();
+
+                // 2) Remove the target entry from history (it's coming back into active editing)
+                //    — re-fetch first since step 1 just appended a new entry at the end; the target's
+                //    original index (idx) is still valid because it was before that new append.
+                let hist2 = getBillHistory();
+                hist2.splice(idx, 1);
+                _ls.set('rwd_bill_history' + getActiveProjectSuffix(), JSON.stringify(hist2));
+
+                // 3) Load the target bill's complete saved data as the active bill
+                //    (also push to cloud first — loadSavedData() prefers cloud data, so local-only
+                //    would get silently overridden by the stale cloud copy of the bill we just archived)
+                let suffix = getActiveProjectSuffix();
+                _ls.set('rwd_billing_v12_master' + suffix, target.fullData);
+                if (typeof window.saveAllDataToCloud === "function") {
+                    try {
+                        let targetDataObj = JSON.parse(target.fullData);
+                        await window.saveAllDataToCloud(suffix, targetDataObj);
+                    } catch(e) {}
+                }
+                await loadSavedData();
+
+                // Now actively editing a bill pulled from History — reveal the Save/Update Bill button.
+                isEditingHistoryBill = true;
+                updateSaveUpdateBillButtonVisibility();
+
+                showToast('✏️ ' + target.seq + ' ' + target.type + ' Bill ab edit mode me load ho gaya hai — changes karke save ho jayenge.');
+            }
+        );
+    }
+
+    function viewBillHistoryDetail(idx) {
+        let hist = getBillHistory();
+        let h = hist[idx];
+        if(!h) return;
+
+        function fmt(v) { return (parseFloat(v) || 0).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+        let full = null;
+        try { full = h.fullData ? JSON.parse(h.fullData) : null; } catch(e) { full = null; }
+
+        document.getElementById('billDetailTitle').innerText = '📄 ' + h.seq + ' ' + h.type + ' Bill — ' + (h.workName || '');
+
+        let html = `<div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-light); margin-bottom:16px;">
+            <span>Bond No: <b>${h.bondNo || '-'}</b> &nbsp;|&nbsp; Saved On: <b>${h.date || '-'}</b></span>
+            <button onclick="editBillHistoryEntry(${idx})" style="background:#f59e0b; color:white; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; font-size:12px; font-weight:700;">✏️ Edit This Bill</button>
+        </div>`;
+
+        // ---- Bill Abstract (Tab 2) ----
+        let abstractRows = (full && full.tab2Rows && full.tab2Rows.length > 0) ? full.tab2Rows : (h.abstractRows || []);
+        if(abstractRows.length > 0) {
+            html += `<div style="font-weight:800; font-size:13px; color:var(--text-dark); margin:14px 0 8px 0;">📊 Bill Abstract</div>
+            <table style="width:100%; border-collapse:collapse; font-size:11.5px; margin-bottom:10px;">
+                <thead><tr style="background:#0369a1; color:white;">
+                    <th style="padding:6px;">Sr</th><th style="padding:6px;">Last Qty</th><th style="padding:6px;">This Qty</th><th style="padding:6px;">Upto Qty</th><th style="padding:6px;">Rate</th><th style="padding:6px;">Last Amt</th><th style="padding:6px;">This Amt</th><th style="padding:6px;">Upto Amt</th>
+                </tr></thead><tbody>`;
+            abstractRows.forEach((r, i) => {
+                html += `<tr style="border-bottom:1px solid var(--border-color);">
+                    <td style="padding:6px; text-align:center;">${i+1}</td>
+                    <td style="padding:6px; text-align:right;">${fmt(r.lastQty)}</td>
+                    <td style="padding:6px; text-align:right;">${fmt(r.thisQty)}</td>
+                    <td style="padding:6px; text-align:right;">${fmt(r.uptoQty)}</td>
+                    <td style="padding:6px; text-align:right;">${fmt(r.rate)}</td>
+                    <td style="padding:6px; text-align:right;">${fmt(r.lastAmt)}</td>
+                    <td style="padding:6px; text-align:right;">${fmt(r.thisAmt)}</td>
+                    <td style="padding:6px; text-align:right; font-weight:700;">${fmt(r.uptoAmt)}</td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+        }
+
+        // ---- Royalty (Tab 3) ----
+        if(full && full.tab3Rows && full.tab3Rows.length > 0) {
+            html += `<div style="font-weight:800; font-size:13px; color:var(--text-dark); margin:14px 0 8px 0;">⛏️ Royalty Calculator</div>
+            <table style="width:100%; border-collapse:collapse; font-size:11.5px; margin-bottom:10px;">
+                <thead><tr style="background:#7c3aed; color:white;">
+                    <th style="padding:6px;">Sr</th><th style="padding:6px;">Item Qty</th><th style="padding:6px;">Sand Factor</th><th style="padding:6px;">Grit Factor</th><th style="padding:6px;">Stone Factor</th>
+                </tr></thead><tbody>`;
+            full.tab3Rows.forEach((r, i) => {
+                html += `<tr style="border-bottom:1px solid var(--border-color);">
+                    <td style="padding:6px; text-align:center;">${i+1}</td>
+                    <td style="padding:6px; text-align:right;">${fmt(r.itemQty)}</td>
+                    <td style="padding:6px; text-align:right;">${fmt(r.sandFactor)}</td>
+                    <td style="padding:6px; text-align:right;">${fmt(r.gritFactor)}</td>
+                    <td style="padding:6px; text-align:right;">${fmt(r.stoneFactor)}</td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+        }
+
+        // ---- Payment Summary ----
+        let pb = h.paymentBreakdown || {};
+        html += `<div style="font-weight:800; font-size:13px; color:var(--text-dark); margin:14px 0 8px 0;">💰 Payment Summary</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 20px; font-size:12px; background:var(--bg-main); padding:12px; border-radius:8px; border:1px solid var(--border-color);">
+            <div style="display:flex; justify-content:space-between;"><span>Gross (With GST):</span><b>${fmt(h.gross)}</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>Security Deposit:</span><b>${fmt(pb.secDeposit)}</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>Performance Security:</span><b>${fmt(pb.perfSecurity)}</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>Income Tax:</span><b>${fmt(pb.incomeTax)}</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>SGST:</span><b>${fmt(pb.sgst)}</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>CGST:</span><b>${fmt(pb.cgst)}</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>Labour Cess:</span><b>${fmt(pb.laborCess)}</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>Royalty:</span><b>${fmt(pb.royalty)}</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>DMF:</span><b>${fmt(pb.dmf)}</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>CESS (COM):</span><b>${fmt(pb.com)}</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>Stamp:</span><b>${fmt(pb.stamp)}</b></div>
+            <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:6px; margin-top:2px;"><span>Total Deductions:</span><b>${fmt(h.totalDeductions)}</b></div>
+            <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:6px; margin-top:2px; color:#059669; font-size:14px;"><span>Net Payable:</span><b>${fmt(h.netPayable)}</b></div>
+        </div>`;
+
+        document.getElementById('billDetailContent').innerHTML = html;
+        document.getElementById('billDetailModal').style.display = 'flex';
+    }
+
     // 🌐 INTEGRATED LOCAL AND CLOUD SAVE SYSTEM
     async function saveAllData(targetProject = null) {
         let currentActive = _ls.get('rwd_active_project') || 'default';
@@ -3712,6 +4240,12 @@
             gstRate: document.getElementById('cfgSettingGST').value,
             masterRoyRate: document.getElementById('cfgSettingRoyalty').value,
             royaltyConvFactor: document.getElementById('cfgRoyaltyConversionFactor').value,
+            defSandFactor: document.getElementById('cfgDefaultSandFactor').value,
+            defGritFactor: document.getElementById('cfgDefaultGritFactor').value,
+            defStoneFactor: document.getElementById('cfgDefaultStoneFactor').value,
+            dmfPercent: document.getElementById('cfgDmfPercent').value,
+            comPercent: document.getElementById('cfgComPercent').value,
+            stampPercent: document.getElementById('cfgStampPercent').value,
             lastOverallRoyaltyQtyVal: document.getElementById('lastOverallRoyaltyQty').value,
             chkEnableOverallCalcVal: document.getElementById('chkEnableOverallCalc').checked,
             rDeducts: [document.getElementById('deductSand').value, document.getElementById('deductGrit').value, document.getElementById('deductStone').value],
@@ -3786,6 +4320,11 @@
 
     // 2. CLOUD DATA INJECTION ENGINE
     async function loadSavedData() {
+        // Any fresh load of project data means we are NOT in a history-edit session unless the
+        // caller explicitly re-enables it afterward (see editBillHistoryEntry).
+        isEditingHistoryBill = false;
+        updateSaveUpdateBillButtonVisibility();
+
         let currentActive = _ls.get('rwd_active_project') || 'default';
         let cleanSuffix = currentActive.trim().toLowerCase().replace(/[^a-zA-Z0-9_]/g, "");
         let suffix = cleanSuffix === 'default' ? '' : '_' + cleanSuffix;
@@ -3814,6 +4353,12 @@
         if(!dataObj) { 
             document.getElementById('cfgSettingRoyalty').value = '252';
             document.getElementById('cfgRoyaltyConversionFactor').value = '144';
+            document.getElementById('cfgDefaultSandFactor').value = '0';
+            document.getElementById('cfgDefaultGritFactor').value = '0';
+            document.getElementById('cfgDefaultStoneFactor').value = '0';
+            document.getElementById('cfgDmfPercent').value = '15';
+            document.getElementById('cfgComPercent').value = '10';
+            document.getElementById('cfgStampPercent').value = '2';
             document.getElementById('lastOverallRoyaltyQty').value = '0.00';
             document.getElementById('chkEnableOverallCalc').checked = false;
             toggleOverallCalcVisibility();
@@ -3846,6 +4391,12 @@
         document.getElementById('cfgSettingGST').value = dataObj.gstRate || '18';
         document.getElementById('cfgSettingRoyalty').value = dataObj.masterRoyRate || '252';
         document.getElementById('cfgRoyaltyConversionFactor').value = dataObj.royaltyConvFactor || '144';
+        document.getElementById('cfgDefaultSandFactor').value = dataObj.defSandFactor || '0';
+        document.getElementById('cfgDefaultGritFactor').value = dataObj.defGritFactor || '0';
+        document.getElementById('cfgDefaultStoneFactor').value = dataObj.defStoneFactor || '0';
+        document.getElementById('cfgDmfPercent').value = dataObj.dmfPercent || '15';
+        document.getElementById('cfgComPercent').value = dataObj.comPercent || '10';
+        document.getElementById('cfgStampPercent').value = dataObj.stampPercent || '2';
         
         document.getElementById('lastOverallRoyaltyQty').value = dataObj.lastOverallRoyaltyQtyVal || '0.00';
         document.getElementById('chkEnableOverallCalc').checked = dataObj.chkEnableOverallCalcVal || false;
@@ -4157,45 +4708,135 @@
         let bondNo = document.getElementById('globalBondNo').value || '(no bond no)';
         let workName = document.getElementById('globalWorkName').value || 'This Project';
 
+        // HARD LOCK: once a bill for this bond/work has been marked Final, no further bill can ever be added.
+        if (typeEl.value === 'Final') {
+            showToast('⛔ Is Bond/Work (' + bondNo + ') ka last bill FINAL submit ho chuka hai — naya bill add nahi ho sakta.');
+            return;
+        }
+
         let allSeq = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
         let curSeq = seqEl.value;
+
+        // Auto-generate the next bill sequence: skip any sequence already used (in Bill History)
+        // for this bond, so the same sequence (e.g. "2nd Running") can never be entered twice.
+        let usedSeqs = getBillHistory().map(h => h.seq);
+        usedSeqs.push(curSeq); // the currently open bill's sequence is also "in use"
+
         let curIdx = allSeq.indexOf(curSeq);
-        let nextSeq = curIdx < allSeq.length - 1 ? allSeq[curIdx + 1] : curSeq;
+        let nextSeq = null;
+        for (let i = curIdx + 1; i < allSeq.length; i++) {
+            if (!usedSeqs.includes(allSeq[i])) { nextSeq = allSeq[i]; break; }
+        }
+        if (!nextSeq) {
+            showToast('⛔ Is Bond ke liye sequence list (1st–10th) khatam ho chuki hai ya sab already used hain.');
+            return;
+        }
 
-        let typeOptions = ['Running','Final'];
-        let nextType = prompt(
-            'Project: ' + workName + '\nBond No: ' + bondNo +
-            '\n\nNaye bill ki details:\n' +
-            'Bill Sequence? (current: ' + curSeq + ', suggested next: ' + nextSeq + ')\n' +
-            'Enter sequence (1st/2nd/3rd.../Final ke liye "F" likhen):',
-            nextSeq
-        );
-        if (!nextType) return;
-        nextType = nextType.trim();
-        if (nextType.toLowerCase() === 'f' || nextType.toLowerCase() === 'final') nextType = allSeq[curIdx] || curSeq;
+        document.getElementById('newBillModalInfo').innerHTML =
+            'Work: <b>' + workName + '</b><br>Bond No: <b>' + bondNo + '</b><br>Current Bill: ' + curSeq + ' ' + typeEl.value +
+            '<br><br>Measurements aur payment summary clear ho jaayegi. Project details (Bond No, Name, Dates) same rahenge.';
+        document.getElementById('nbSeqSelect').value = nextSeq;
+        document.getElementById('nbTypeSelect').value = 'Running';
+        document.getElementById('newBillModal').style.display = 'flex';
+    }
 
-        let billKind = prompt('Bill type? Running ya Final:', 'Final');
-        if (!billKind) return;
-        billKind = billKind.trim();
-        if (!['Running','Final'].includes(billKind)) billKind = 'Running';
+    // Builds a complete, fully-restorable snapshot of whatever bill is CURRENTLY active/open,
+    // and pushes it into Bill History. Reused both when starting a new bill and when pulling an
+    // old bill out for editing (so the bill being replaced is never lost).
+    async function snapshotCurrentBillToHistory() {
+        await saveAllData();
+        let suffix = getActiveProjectSuffix();
+        let fullDataRaw = _ls.get('rwd_billing_v12_master' + suffix);
 
-        if (!confirm(
-            'Bond No: ' + bondNo + '\n' +
-            'Project: ' + workName + '\n\n' +
-            'Bill Sequence: ' + nextType + ' ' + billKind + ' Bill\n\n' +
-            'Measurements aur payment summary clear ho jaayegi.\nProject details (Bond No, Name, Dates) same rahenge.\n\nContinue?'
-        )) return;
+        let snapshotAbstractRows = [];
+        document.querySelectorAll('#abstractTable tbody tr').forEach(row => {
+            snapshotAbstractRows.push({
+                lastQty: row.querySelector('.abs-last-qty').value,
+                thisQty: row.querySelector('.abs-this-qty').value,
+                rate:    row.querySelector('.abs-rate').value,
+                uptoQty: row.querySelector('.abs-upto-qty').value,
+                lastAmt: row.querySelector('.abs-last-amt').value,
+                thisAmt: row.querySelector('.abs-this-amt').value,
+                uptoAmt: row.querySelector('.abs-upto-amt').value
+            });
+        });
+
+        saveBillHistorySnapshot({
+            seq: document.getElementById('globalBillSequence').value,
+            type: document.getElementById('globalBillType').value,
+            workName: document.getElementById('globalWorkName').value,
+            bondNo: document.getElementById('globalBondNo').value || '(no bond no)',
+            date: new Date().toLocaleDateString('en-IN'),
+            gross: parseFloat(document.getElementById('pThisBillGross').innerText) || 0,
+            totalDeductions: parseFloat(document.getElementById('lblTotalDeductions').innerText) || 0,
+            netPayable: parseFloat(document.getElementById('lblActualNetPayableContractor').innerText) || 0,
+            paymentBreakdown: {
+                secDeposit:    parseFloat(document.getElementById('pSecDepositFinal').innerText)   || 0,
+                perfSecurity:  parseFloat(document.getElementById('pPerfSecurityFinal').innerText) || 0,
+                incomeTax:     parseFloat(document.getElementById('pIncomeTax').innerText)         || 0,
+                sgst:          parseFloat(document.getElementById('pSgst').innerText)              || 0,
+                cgst:          parseFloat(document.getElementById('pCgst').innerText)              || 0,
+                laborCess:     parseFloat(document.getElementById('pLaborCess').innerText)         || 0,
+                royalty:       parseFloat(document.getElementById('pRoyaltyFinal').innerText)      || 0,
+                dmf:           parseFloat(document.getElementById('pDmfFinal').innerText)          || 0,
+                com:           parseFloat(document.getElementById('pComFinal').innerText)          || 0,
+                stamp:         parseFloat(document.getElementById('pStampFinal').innerText)        || 0
+            },
+            abstractRows: snapshotAbstractRows,
+            fullData: fullDataRaw,
+            savedAt: new Date().toISOString()
+        });
+
+        return snapshotAbstractRows;
+    }
+
+    // Runs when user confirms in the New Bill modal (called by its "Confirm & Create" button)
+    async function confirmNewBillCreation() {
+        let seqEl  = document.getElementById('globalBillSequence');
+        let typeEl = document.getElementById('globalBillType');
+        let bondNo = document.getElementById('globalBondNo').value || '(no bond no)';
+
+        let nextSeq = document.getElementById('nbSeqSelect').value;
+        let billKind = document.getElementById('nbTypeSelect').value;
+
+        // Safety net: never allow creating a bill sequence that's already been used for this bond
+        let usedSeqs = getBillHistory().map(h => h.seq);
+        if (usedSeqs.includes(nextSeq)) {
+            document.getElementById('newBillModal').style.display = 'none';
+            showToast('⛔ "' + nextSeq + '" bill is Bond No ke liye pehle se hi entered/saved hai — dobara nahi ban sakta.');
+            return;
+        }
+
+        document.getElementById('newBillModal').style.display = 'none';
+
+        // Starting a fresh new bill — no longer "editing" a past history record.
+        isEditingHistoryBill = false;
+        updateSaveUpdateBillButtonVisibility();
+
+        // ---- 1) Save a COMPLETE, fully restorable snapshot of the bill being closed (Bill History) ----
+        // This reuses the exact same full data structure that normal save/load uses, so the entire
+        // bill (measurement + abstract + royalty + payment summary) stays permanently accessible.
+        let snapshotAbstractRows = await snapshotCurrentBillToHistory();
+
+        // ---- 2) Carry forward: previous bill's "Up to Date" qty/amt becomes next bill's "Last Bill" qty/amt ----
+        let carryForwardRows = snapshotAbstractRows.map(r => ({
+            lastQty: r.uptoQty,
+            thisQty: '',
+            rate: r.rate
+        }));
 
         // Update bill sequence only
-        seqEl.value = nextType;
+        seqEl.value = nextSeq;
         typeEl.value = billKind;
 
-        // Clear measurement + abstract + royalty tables for new bill
+        // Clear measurement + royalty tables for new bill; roll forward abstract table (not wipe it)
         saveState();
         document.querySelector('#calcTable tbody').innerHTML = '';
         document.querySelector('#abstractTable tbody').innerHTML = '';
         document.querySelector('#royaltyTable tbody').innerHTML = '';
-        addSingleRowTab1(); addSingleRowTab2(); addSingleRowTab3();
+        addSingleRowTab1();
+        if(carryForwardRows.length > 0) { carryForwardRows.forEach(r => addSingleRowTab2(r)); } else { addSingleRowTab2(); }
+        addSingleRowTab3();
 
         // Clear payment fields for new bill
         document.getElementById('pDmfManual').value = '';
@@ -4209,12 +4850,13 @@
 
         reindexTableSerialNumbers('calcTable');
         reindexTableSerialNumbers('abstractTable');
+        updateTotalsOnly();
         triggerPaymentSync();
         triggerLiveAutoSave();
         updateMultiBillLedgerView();
         toggleLastPaidDateVisibility();
 
-        showToast('🔁 ' + nextType + ' ' + billKind + ' Bill ready! Bond No: ' + bondNo);
+        showToast('🔁 ' + nextSeq + ' ' + billKind + ' Bill ready! Last bill ka Upto-Date record automatically carry-forward ho gaya hai. Bond No: ' + bondNo);
     }
 
     window.onload = async function() {
