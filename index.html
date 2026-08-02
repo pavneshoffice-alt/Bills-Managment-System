@@ -2,6 +2,7 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BILLING AND PAYMENT ENGINE v18.5 (Cloud Synced)</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
@@ -259,13 +260,32 @@
         .pp-bill-pair select { flex: 1; }
         /* ================= END UNIFIED PROJECT PORTFOLIO CARD ================= */
 
-        /* ================= NEW PROJECT MODAL — SECTIONS ================= */
-        .np-section-label {
-            font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;
-            letter-spacing: 0.7px; margin: 20px 0 10px 0; display: flex; align-items: center; gap: 7px;
+        /* ================= NEW PROJECT MODAL — REDESIGN (numbered step cards) ================= */
+        .np-step-card {
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 14px 16px 16px 16px;
+            margin-bottom: 14px;
         }
-        .np-section-label:first-of-type { margin-top: 0; }
-        .np-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
+        .np-step-card:last-child { margin-bottom: 0; }
+        .np-step-head { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+        .np-step-num {
+            width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+            background: var(--primary); color: #fff; font-size: 11px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .np-step-title { font-size: 12px; font-weight: 800; color: var(--text-dark); text-transform: uppercase; letter-spacing: 0.6px; }
+        .np-step-sub { font-size: 10.5px; font-weight: 500; color: var(--text-light); text-transform: none; letter-spacing: 0; margin-top: 1px; }
+
+        .np-step-card.c-purple { border-left-color: #8b5cf6; }
+        .np-step-card.c-purple .np-step-num { background: #8b5cf6; }
+        .np-step-card.c-indigo { border-left-color: #6366f1; }
+        .np-step-card.c-indigo .np-step-num { background: #6366f1; }
+        .np-step-card.c-amber { border-left-color: #d97706; }
+        .np-step-card.c-amber .np-step-num { background: #d97706; }
+
         .np-seq-badge {
             display: flex; align-items: center; justify-content: center; gap: 6px;
             background: var(--primary-light); color: var(--primary); font-weight: 800; font-size: 13px;
@@ -723,57 +743,6 @@
         /* ================= EXECUTIVE DASHBOARD — REDESIGN ================= */
         .exec-dash-wrap { margin-top: 14px; display: flex; flex-direction: column; gap: 18px; }
 
-        /* Identity header strip */
-        .exec-hero {
-            background: linear-gradient(120deg, var(--primary) 0%, #4f46e5 100%);
-            border-radius: var(--radius-lg);
-            padding: 22px 26px;
-            color: #ffffff;
-            box-shadow: var(--card-shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            position: relative;
-            overflow: hidden;
-        }
-        .exec-hero::before {
-            content: "";
-            position: absolute;
-            top: -60px; right: -60px;
-            width: 220px; height: 220px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 50%;
-        }
-        .exec-hero::after {
-            content: "";
-            position: absolute;
-            bottom: -80px; right: 120px;
-            width: 160px; height: 160px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 50%;
-        }
-        .exec-hero-left { position: relative; z-index: 1; min-width: 220px; }
-        .exec-hero-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.75; margin-bottom: 4px; }
-        .exec-hero-title { font-size: 21px; font-weight: 800; line-height: 1.25; max-width: 480px; }
-        .exec-hero-meta { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px; position: relative; z-index: 1; }
-        .exec-hero-meta-item { display: flex; flex-direction: column; gap: 2px; }
-        .exec-hero-meta-label { font-size: 9.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; }
-        .exec-hero-meta-value { font-size: 13.5px; font-weight: 800; }
-        .exec-hero-badge {
-            position: relative; z-index: 1;
-            background: rgba(255,255,255,0.16);
-            border: 1px solid rgba(255,255,255,0.3);
-            backdrop-filter: blur(4px);
-            padding: 10px 18px;
-            border-radius: var(--radius-md);
-            text-align: center;
-            min-width: 150px;
-        }
-        .exec-hero-badge-label { font-size: 9.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: 0.8; }
-        .exec-hero-badge-value { font-size: 16px; font-weight: 800; margin-top: 3px; }
-
         /* KPI tiles */
         .exec-kpi-grid {
             display: grid;
@@ -814,15 +783,6 @@
         .exec-kpi-tile.t-net   .exec-kpi-icon { background: rgba(16,185,129,0.12); color: var(--success); }
         .exec-kpi-tile.t-net   .exec-kpi-value { color: var(--success); }
 
-        /* Two-column lower row: timeline + ledger */
-        .exec-lower-grid {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 18px;
-            align-items: start;
-        }
-        @media (max-width: 900px) { .exec-lower-grid { grid-template-columns: 1fr; } }
-
         .exec-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -838,24 +798,6 @@
             border-bottom: 1px solid var(--border-color);
         }
         .exec-card-title.alt { color: #8b5cf6; }
-
-        /* Timeline */
-        .exec-timeline { display: flex; flex-direction: column; gap: 0; }
-        .exec-tl-item { display: flex; gap: 12px; position: relative; padding-bottom: 22px; }
-        .exec-tl-item:last-child { padding-bottom: 0; }
-        .exec-tl-dot-col { display: flex; flex-direction: column; align-items: center; }
-        .exec-tl-dot {
-            width: 11px; height: 11px; border-radius: 50%;
-            background: var(--primary); flex-shrink: 0;
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-        .exec-tl-line { width: 2px; flex: 1; background: var(--border-color); margin-top: 2px; }
-        .exec-tl-item:last-child .exec-tl-line { display: none; }
-        .exec-tl-body { padding-top: -2px; }
-        .exec-tl-label { font-size: 10.5px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.4px; }
-        .exec-tl-value { font-size: 13.5px; font-weight: 800; color: var(--text-dark); margin-top: 2px; }
-        .exec-tl-item.tl-meas .exec-tl-dot { background: #2563eb; }
-        .exec-tl-item.tl-pay .exec-tl-dot { background: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.15); }
 
         /* Ledger card header redesigned (keeps existing #multiBillLedgerTable intact) */
         .exec-ledger-card { padding: 18px 20px 14px; }
@@ -940,6 +882,71 @@
             margin-bottom: 12px;
             letter-spacing: 0.5px;
         }
+
+        /* ================= GLOBAL UI POLISH ================= */
+        /* Consistent, smooth interaction feel on every clickable control */
+        button, .btn-pm, .tab-btn, .btn-clear, .btn-excel, .btn-pdf-export, .btn-print, .btn-delete {
+            transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+        button:active { transform: translateY(0) scale(0.98); }
+
+        /* Slim, theme-aware scrollbars instead of the bulky OS default (mainly helps modals & wide tables) */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
+
+        /* Semantic solid button variants — reusable across the app so colors/contrast stay consistent
+           instead of one-off inline background+color combos (root cause of the earlier invisible-text bug). */
+        .btn-solid { color: #ffffff !important; font-weight: 700; border-radius: 8px; cursor: pointer; }
+        .btn-solid-indigo  { background: #6366f1; border: 1px solid #4f46e5; }
+        .btn-solid-indigo:hover  { background: #4f46e5; }
+        .btn-solid-emerald { background: #059669; border: 1px solid #047857; }
+        .btn-solid-emerald:hover { background: #047857; }
+        .btn-solid-amber   { background: #d97706; border: 1px solid #b45309; }
+        .btn-solid-amber:hover   { background: #b45309; }
+        .btn-solid-rose    { background: #e11d48; border: 1px solid #be123c; }
+        .btn-solid-rose:hover    { background: #be123c; }
+
+        /* ================= RESPONSIVE / MOBILE ================= */
+        @media (max-width: 860px) {
+            body { padding: 10px; }
+            .container { padding: 16px; border-radius: var(--radius-md); }
+            h2 { font-size: 19px; letter-spacing: 1px; }
+            .subtitle { font-size: 10px; letter-spacing: 1px; margin-bottom: 10px; }
+
+            .tab-navigation { gap: 6px; padding-bottom: 8px; }
+            .tab-btn { padding: 8px 12px; font-size: 11px; }
+
+            .pp-bar { padding: 10px 12px; flex-direction: column; align-items: stretch; }
+            .pp-bar-left, .pp-bar-right { width: 100%; }
+            .pp-bar-right { justify-content: flex-start; }
+            .pp-bar-right .btn-pm { flex: 1 1 auto; justify-content: center; }
+
+            .pp-field-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+            .tab-action-toolbar-right { width: 100%; justify-content: flex-start; margin-left: 0; margin-top: 8px; }
+            .tab-action-toolbar-right button { flex: 1 1 auto; }
+
+            /* Modals: use nearly full width and tighter padding on small screens */
+            #newProjectModal > div, #billHistoryModal > div, #billDetailModal > div {
+                width: 96vw !important;
+                max-height: 94vh !important;
+            }
+            #newProjectModal .pp-field-grid { grid-template-columns: 1fr; }
+            #newProjectModal > div > div { padding-left: 18px !important; padding-right: 18px !important; }
+            .np-step-card { padding: 12px; }
+
+            table { font-size: 11px; }
+
+            .exec-card-title.alt { flex-wrap: wrap; gap: 8px; }
+        }
+
+        @media (max-width: 480px) {
+            .pp-field-grid { grid-template-columns: 1fr; }
+            .tab-btn { flex: 1 1 calc(50% - 6px); text-align: center; }
+            h2 { font-size: 16px; }
+        }
     </style>
 </head>
 <body>
@@ -1009,80 +1016,78 @@
 
 <!-- ===== COMBINED NEW PROJECT MODAL (Work Name + Bond No + Bill Identity Sequence + Timeline) ===== -->
 <div id="newProjectModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100002; justify-content:center; align-items:center;">
-    <div style="background:var(--card-bg); padding:0; border-radius:18px; width:560px; max-width:92vw; max-height:90vh; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); display:flex; flex-direction:column;">
+    <div style="background:var(--card-bg); padding:0; border-radius:18px; width:580px; max-width:92vw; max-height:90vh; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); display:flex; flex-direction:column;">
 
-        <div style="padding:22px 28px 16px 28px; border-bottom:1px solid var(--border-color); background:linear-gradient(135deg, var(--primary-light), transparent);">
-            <h3 style="margin:0; color:var(--text-dark); font-weight:800; font-size:17px; display:flex; align-items:center; gap:10px;">
-                <span style="background:var(--primary); color:white; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;">➕</span>
-                Add New Project
-            </h3>
-            <div style="font-size:11.5px; color:var(--text-light); margin-top:5px; margin-left:38px;">Saari details ek hi baar me bhar dein — baad me alag se dalne ki zaroorat nahi.</div>
+        <div style="padding:20px 26px; border-bottom:1px solid var(--border-color); background:linear-gradient(135deg, var(--primary-light), transparent); display:flex; align-items:center; gap:12px;">
+            <span style="background:var(--primary); color:white; border-radius:50%; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; box-shadow:0 4px 10px rgba(37,99,235,0.3);">➕</span>
+            <div>
+                <h3 style="margin:0; color:var(--text-dark); font-weight:800; font-size:16px;">Add New Project</h3>
+                <div style="font-size:11.5px; color:var(--text-light); margin-top:2px;"></div>
+            </div>
         </div>
 
-        <div style="padding:20px 28px 24px 28px; overflow-y:auto;">
+        <div style="padding:18px 24px 22px 24px; overflow-y:auto; background:var(--card-bg);">
 
-            <!-- SECTION: Project Identity -->
-            <div class="np-section-label">📁 Project Identity</div>
-            <div class="pp-field">
-                <label>Name of Work / Project</label>
-                <input type="text" id="npWorkName" placeholder="Enter full work / project name..." autocomplete="off"
-                    oninput="liveSearchExistingWorkNames()">
-                <div id="npWorkNameSuggestions" style="display:none; margin-top:2px; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden; max-height:160px; overflow-y:auto;"></div>
-                <div id="npWorkNameHint" style="font-size:10.5px; color:var(--text-light); font-weight:500; text-transform:none; letter-spacing:0;">Agar yeh work pehle se exist karta hai to suggestion mein dikhega — usi par click karke seedha next bill add kar sakte hain.</div>
-            </div>
-
-            <!-- SECTION: Bond Details -->
-            <div class="np-section-label">📜 Bond / Agreement Details</div>
-            <div class="pp-field-grid">
-                <div class="pp-field f-bondno">
-                    <label>Bond / Agreement No</label>
-                    <input type="text" id="npBondNo" placeholder="e.g., 45/2025-26" autocomplete="off" oninput="liveSearchExistingBondNo()">
-                    <div id="npBondNoSuggestions" style="display:none; margin-top:2px; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden; max-height:160px; overflow-y:auto;"></div>
-                </div>
-                <div class="pp-field f-bondamt">
-                    <label>Bond Amount (₹)</label>
-                    <input type="number" id="npBondAmount" placeholder="0.00">
-                </div>
-            </div>
-            <div id="npBondNoHint" style="font-size:10.5px; color:var(--text-light); margin-top:6px;">Same Bond No dalte hi system automatically usi record ko detect karke next bill (2nd/3rd Running...) ke liye redirect kar dega. Agar us bond ka last bill FINAL tha to naya bill add nahi hoga.</div>
-
-            <!-- SECTION: Bill Stage -->
-            <div class="np-section-label">🧾 Bill Stage</div>
-            <div class="pp-field-grid">
-                <div class="pp-field">
-                    <label>Bill Identity Sequence <span style="text-transform:none; font-weight:500;">(auto)</span></label>
-                    <div class="np-seq-badge" id="npBillSequenceBadge">🔒 1st Bill</div>
-                    <input type="hidden" id="npBillSequence" value="1st">
+            <!-- STEP 1: Project Identity -->
+            <div class="np-step-card">
+                <div class="np-step-head">
+                    <span class="np-step-num">1</span>
+                    <span class="np-step-title">Project Identity</span>
                 </div>
                 <div class="pp-field">
-                    <label>Bill Type</label>
-                    <select id="npBillType">
-                        <option value="Running">Running</option>
-                        <option value="Final">Final</option>
-                    </select>
+                    <label>Name of Work / Project</label>
+                    <input type="text" id="npWorkName" placeholder="Enter full work / project name..." autocomplete="off"
+                        oninput="liveSearchExistingWorkNames()">
+                    <div id="npWorkNameSuggestions" style="display:none; margin-top:2px; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden; max-height:160px; overflow-y:auto;"></div>
+                    <div id="npWorkNameHint" style="font-size:10.5px; color:var(--text-light); font-weight:500; text-transform:none; letter-spacing:0; margin-top:4px;"></div>
                 </div>
             </div>
 
-            <!-- SECTION: Timeline -->
-            <div class="np-section-label">🗓️ Project Timeline</div>
-            <div class="pp-field-grid">
-                <div class="pp-field">
-                    <label>Date of Start</label>
-                    <input type="date" id="npDateStart">
+            <!-- STEP 2: Bond Details -->
+            <div class="np-step-card c-purple">
+                <div class="np-step-head">
+                    <span class="np-step-num">2</span>
+                    <span class="np-step-title">Bond / Agreement Details</span>
                 </div>
-                <div class="pp-field">
-                    <label>Date of Completion</label>
-                    <input type="date" id="npDateCompletion">
+                <div class="pp-field-grid">
+                    <div class="pp-field f-bondno">
+                        <label>Bond / Agreement No</label>
+                        <input type="text" id="npBondNo" placeholder="e.g., 45/2025-26" autocomplete="off" oninput="liveSearchExistingBondNo()">
+                        <div id="npBondNoSuggestions" style="display:none; margin-top:2px; border:1px solid var(--border-color); border-radius:var(--radius-sm); overflow:hidden; max-height:160px; overflow-y:auto;"></div>
+                    </div>
+                    <div class="pp-field f-bondamt">
+                        <label>Bond Amount (₹)</label>
+                        <input type="number" id="npBondAmount" placeholder="0.00">
+                    </div>
                 </div>
-                <div class="pp-field f-meas">
-                    <label>Date of Measurement</label>
-                    <input type="date" id="npDateMeasurement">
+                <div id="npBondNoHint" style="font-size:10.5px; color:var(--text-light); margin-top:8px;"></div>
+            </div>
+
+            <!-- STEP 3: Bill Stage -->
+            <div class="np-step-card c-indigo">
+                <div class="np-step-head">
+                    <span class="np-step-num">3</span>
+                    <span class="np-step-title">Bill Stage</span>
+                </div>
+                <div class="pp-field-grid">
+                    <div class="pp-field">
+                        <label>Bill Identity Sequence <span style="text-transform:none; font-weight:500;">(auto)</span></label>
+                        <div class="np-seq-badge" id="npBillSequenceBadge">🔒 1st Bill</div>
+                        <input type="hidden" id="npBillSequence" value="1st">
+                    </div>
+                    <div class="pp-field">
+                        <label>Bill Type</label>
+                        <select id="npBillType">
+                            <option value="Running">Running</option>
+                            <option value="Final">Final</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
         </div>
 
-        <div style="display:flex; gap:10px; padding:18px 28px; border-top:1px solid var(--border-color); background:var(--bg-main);">
+        <div style="display:flex; gap:10px; padding:16px 24px; border-top:1px solid var(--border-color); background:var(--bg-main);">
             <button onclick="closeNewProjectModal()" style="flex:1; padding:12px; background:var(--neutral-light); color:var(--text-dark); border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px;">Cancel</button>
             <button onclick="submitNewProjectForm()" style="flex:2; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px; box-shadow:0 4px 6px rgba(37,99,235,0.2);">➕ Create Project</button>
         </div>
@@ -1227,8 +1232,8 @@
                         <div class="pp-bar-left">
                             <div class="pp-bar-icon">📂</div>
                             <div class="pp-bar-label-col">
-                                <span class="pp-title">Project Portfolio</span>
-                                <span class="pp-subtitle">Switch projects &amp; manage full work details</span>
+                                <span class="pp-title">PROJECT PORTFOLIO
+                                <span class="pp-subtitle"></span>
                             </div>
                             <select id="projectSelector" class="pm-select" onchange="loadSelectedProject()">
                                 <option value="default">-- Default Project --</option>
@@ -1238,7 +1243,7 @@
                         <div class="pp-bar-right">
                             <button class="btn-pm btn-pm-new" onclick="openNewProjectModal()">➕ New Project</button>
                             <button class="btn-pm btn-pm-bill" id="btnNewBillSameProject" onclick="newBillSameProject()" title="Same project ka naya bill — Bill Sequence badlega">🔁 New Bill</button>
-                            <button class="btn-pm" style="background:#6366f1; color:white; border:1px solid #4f46e5; font-weight:700;" onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'" onclick="openBillHistoryModal()" title="Is bond/work ke purane bills ka record dekhein">📜 Bill History</button>
+                            <button class="btn-pm btn-solid btn-solid-indigo" onclick="openBillHistoryModal()" title="Is bond/work ke purane bills ka record dekhein">📜 Bill History</button>
                             <button class="btn-pm btn-pm-delete" onclick="deleteCurrentProject()">✖ Delete</button>
 
                             <div id="autosaveBadge" class="autosave-status-badge synced">✓ System Synced</div>
@@ -1271,7 +1276,7 @@
 
                         <div class="pp-field-grid">
                             <div class="pp-field">
-                                <label>Bill Identity Sequence <span style="color:var(--text-light); text-transform:none; font-weight:500; font-size:10px;">(system auto-managed — locked)</span></label>
+                                <label>Bill Identity Sequence <span style="color:var(--text-light); text-transform:none; font-weight:500; font-size:10px;"></span></label>
                                 <div class="pp-bill-pair">
                                     <select id="globalBillSequence" disabled title="Bill Identity Sequence sirf system automatically set karta hai — manually badla nahi ja sakta." style="background:var(--neutral-light); cursor:not-allowed; opacity:0.85;" onchange="triggerLiveAutoSave(); triggerPaymentSync(); toggleLastPaidDateVisibility(); updateMultiBillLedgerView();">
                                         <option value="1st">1st</option>
@@ -1359,74 +1364,41 @@
                         </div>
                     </div>
 
-                    <!-- Timeline + Ledger -->
-                    <div class="exec-lower-grid">
-                        <div class="exec-card">
-                            <div class="exec-card-title">🗓️ Project Timeline</div>
-                            <div class="exec-timeline">
-                                <div class="exec-tl-item">
-                                    <div class="exec-tl-dot-col"><div class="exec-tl-dot"></div><div class="exec-tl-line"></div></div>
-                                    <div class="exec-tl-body">
-                                        <div class="exec-tl-label">Date of Start</div>
-                                        <div class="exec-tl-value" id="dashDateStartFormatted">-</div>
-                                    </div>
-                                </div>
-                                <div class="exec-tl-item">
-                                    <div class="exec-tl-dot-col"><div class="exec-tl-dot"></div><div class="exec-tl-line"></div></div>
-                                    <div class="exec-tl-body">
-                                        <div class="exec-tl-label">Date of Completion</div>
-                                        <div class="exec-tl-value" id="dashDateCompFormatted">-</div>
-                                    </div>
-                                </div>
-                                <div class="exec-tl-item tl-meas">
-                                    <div class="exec-tl-dot-col"><div class="exec-tl-dot"></div><div class="exec-tl-line"></div></div>
-                                    <div class="exec-tl-body">
-                                        <div class="exec-tl-label">Date of Measurement</div>
-                                        <div class="exec-tl-value" id="dashDateMeasFormatted">-</div>
-                                    </div>
-                                </div>
-                                <div id="dashLastPayWrapper" class="exec-tl-item tl-pay" style="display:none;">
-                                    <div class="exec-tl-dot-col"><div class="exec-tl-dot"></div></div>
-                                    <div class="exec-tl-body">
-                                        <div class="exec-tl-label">Last Bill Payment Date</div>
-                                        <div class="exec-tl-value" id="dashDateLastPayFormatted" style="color:#f97316;">-</div>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Ledger -->
+                    <div class="exec-card exec-ledger-card" style="margin-top:18px;">
+                        <div class="exec-card-title alt" style="justify-content:space-between; border-bottom:none; margin-bottom:10px; padding-bottom:0;">
+                            <span>🗂️ Multi-Bill Sequential History & Overlap Tracking Ledger</span>
+                            <button id="ledgerBreakdownToggle" onclick="toggleLedgerBreakdown()" style="background:var(--neutral-light); color:var(--text-dark); border:1px solid var(--border-color); border-radius:20px; padding:5px 12px; font-size:10.5px; font-weight:700; cursor:pointer; white-space:nowrap;">🔍 Show Full Breakdown</button>
                         </div>
-
-                        <div class="exec-card exec-ledger-card">
-                            <div class="exec-card-title alt">🗂️ Multi-Bill Sequential History & Overlap Tracking Ledger</div>
-                            <div class="exec-ledger-scroll"><table id="multiBillLedgerTable" style="min-width:1100px;">
-                                <thead>
-                                    <tr style="background:#4b5563;">
-                                        <th rowspan="2" style="vertical-align:middle;">Bill Stage</th>
-                                        <th rowspan="2" style="vertical-align:middle;">Gross (With GST)</th>
-                                        <th colspan="11" style="background:#374151; letter-spacing:0.5px;">Deductions Breakup</th>
-                                        <th rowspan="2" style="vertical-align:middle;">Total Deductions</th>
-                                        <th rowspan="2" style="vertical-align:middle; color:#34d399;">Net Payable</th>
-                                        <th rowspan="2" style="vertical-align:middle;">Status</th>
-                                    </tr>
-                                    <tr style="background:#374151; font-size:10px;">
-                                        <th style="background:#374151;">Sec. Deposit</th>
-                                        <th style="background:#374151;">Perf. Security</th>
-                                        <th style="background:#374151;">Income Tax</th>
-                                        <th style="background:#374151;">SGST</th>
-                                        <th style="background:#374151;">CGST</th>
-                                        <th style="background:#374151;">Labour Cess</th>
-                                        <th style="background:#374151;">Royalty</th>
-                                        <th style="background:#374151;">DMF</th>
-                                        <th style="background:#374151;">CESS (COM)</th>
-                                        <th style="background:#374151;">Stamp</th>
-                                        <th style="background:#374151;">Extra Deductions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="multiBillLedgerBody">
-                                </tbody>
+                        <div class="exec-ledger-scroll"><table id="multiBillLedgerTable" style="min-width:1100px;">
+                            <thead>
+                                <tr style="background:#4b5563;">
+                                    <th rowspan="2" style="vertical-align:middle;">Bill Stage</th>
+                                    <th rowspan="2" style="vertical-align:middle;">Gross (With GST)</th>
+                                    <th colspan="11" class="ledger-detail-col" style="background:#374151; letter-spacing:0.5px; display:none;">Deductions Breakup</th>
+                                    <th rowspan="2" style="vertical-align:middle;">Total Deductions</th>
+                                    <th rowspan="2" style="vertical-align:middle; color:#34d399;">Net Payable</th>
+                                    <th rowspan="2" style="vertical-align:middle;">Status</th>
+                                </tr>
+                                <tr class="ledger-detail-col" style="background:#374151; font-size:10px; display:none;">
+                                    <th style="background:#374151;">Sec. Deposit</th>
+                                    <th style="background:#374151;">Perf. Security</th>
+                                    <th style="background:#374151;">Income Tax</th>
+                                    <th style="background:#374151;">SGST</th>
+                                    <th style="background:#374151;">CGST</th>
+                                    <th style="background:#374151;">Labour Cess</th>
+                                    <th style="background:#374151;">Royalty</th>
+                                    <th style="background:#374151;">DMF</th>
+                                    <th style="background:#374151;">CESS (COM)</th>
+                                    <th style="background:#374151;">Stamp</th>
+                                    <th style="background:#374151;">Extra Deductions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="multiBillLedgerBody">
+                            </tbody>
                             </table>
                             </div>
                         </div>
-                    </div>
                 </div>
             </div>
             
@@ -1435,7 +1407,7 @@
                     <label>Add Multiple Rows:</label>
                     <input type="number" id="t1RowCountInput" class="row-adder-input" value="5" min="1">
                     <button class="row-adder-btn" onclick="saveState(); bulkAddRowsTab1();">Add Rows</button>
-                    <span style="font-size:11px; color:var(--text-light); margin-left:10px;">(Tip: Drag your mouse down on any value to quick-copy it)</span>
+                    <span style="font-size:11px; color:var(--text-light); margin-left:10px;"></span>
                     
                     <div class="tab-action-toolbar-right">
                         <button class="btn-toggle-calc" id="toggleCalcButton" onclick="toggleCalculator()" style="margin-left: 0; margin-right: 8px;">🧮 Open Calc</button>
@@ -1491,7 +1463,7 @@
                     </label>
 
                     <div class="tab-action-toolbar-right">
-                        <button id="btnSaveUpdateBillAbstract" class="btn-pm" style="display:none; background:#059669; color:white; border:1px solid #047857; font-weight:700;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'" onclick="updateCurrentBillHistoryRecord()" title="Is bill ke latest changes ko History me save/update karein">💾 Save/Update Bill</button>
+                        <button id="btnSaveUpdateBillAbstract" class="btn-pm btn-solid btn-solid-emerald" style="display:none;" onclick="updateCurrentBillHistoryRecord()" title="Is bill ke latest changes ko History me save/update karein">💾 Save/Update Bill</button>
                         <button class="btn-clear" onclick="saveState(); clearTab('tab2');">Clear Data</button>
                         <button class="btn-excel" onclick="exportToExcel('abstractTable', 'Bill_Abstract')">📊 Excel Export</button>
                         <button class="btn-print" onclick="window.print()">🖨️ Print Sheet</button>
@@ -2090,15 +2062,10 @@
     }
 
     function changeDashboardDatesFormat() {
-        let start = document.getElementById('globalDateStart').value;
-        let comp = document.getElementById('globalDateCompletion').value;
-        let meas = document.getElementById('globalDateMeasurement').value;
-        let lastPay = document.getElementById('globalLastBillPaymentDate').value;
-        
-        document.getElementById('dashDateStartFormatted').innerText = helperFormatStringToDDMMYYYY(start);
-        document.getElementById('dashDateCompFormatted').innerText = helperFormatStringToDDMMYYYY(comp);
-        document.getElementById('dashDateMeasFormatted').innerText = helperFormatStringToDDMMYYYY(meas);
-        document.getElementById('dashDateLastPayFormatted').innerText = helperFormatStringToDDMMYYYY(lastPay);
+        // The "Project Timeline" card (which used to display these formatted dates) has been
+        // removed from the Executive Dashboard. This function is intentionally left as a safe
+        // no-op — it's still referenced from several date-field onchange handlers, so removing
+        // it entirely would require touching every call site for no benefit.
     }
 
     function formatWorkAbstractField(val) {
@@ -2129,7 +2096,7 @@
         let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
         let downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "QUANTIX_System_Portfolio_Backup.json");
+        downloadAnchor.setAttribute("download", "Pavnesh_System_Portfolio_Backup.json");
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
@@ -2245,7 +2212,7 @@
         document.getElementById('dashGrossBill').innerText = gross.toLocaleString('en-IN');
         document.getElementById('dashDeducts').innerText = deducts.toLocaleString('en-IN');
         document.getElementById('dashNetCash').innerText = net.toLocaleString('en-IN');
-        
+
         changeDashboardDatesFormat();
         updateMultiBillLedgerView();
     }
@@ -2324,7 +2291,7 @@
 
     // Creates a brand-new project using details already collected (Work Name, Bond No, Bill Sequence/Type)
     // via the combined "Add New Project" modal — no further prompts needed.
-    async function createNewProjectWithDetails(projName, workName, bondNo, billSeq, billType, bondAmount, dateStart, dateCompletion, dateMeasurement) {
+    async function createNewProjectWithDetails(projName, workName, bondNo, billSeq, billType, bondAmount) {
         let list = getProjectsList();
         if(list.includes(projName)) {
             alert("इस नाम का प्रोजेक्ट पहले से ही मौजूद है!");
@@ -2338,9 +2305,9 @@
         document.getElementById('globalWorkName').value = workName || '';
         document.getElementById('globalBondNo').value = bondNo || '';
         document.getElementById('globalBondAmount').value = bondAmount || '';
-        document.getElementById('globalDateStart').value = dateStart || '';
-        document.getElementById('globalDateCompletion').value = dateCompletion || '';
-        document.getElementById('globalDateMeasurement').value = dateMeasurement || '';
+        document.getElementById('globalDateStart').value = '';
+        document.getElementById('globalDateCompletion').value = '';
+        document.getElementById('globalDateMeasurement').value = '';
         document.getElementById('globalLastBillPaymentDate').value = '';
         
         document.getElementById('globalBillSequence').value = billSeq || '1st';
@@ -2408,9 +2375,6 @@
         document.getElementById('npBillSequence').value = '1st';
         document.getElementById('npBillType').value = 'Running';
         document.getElementById('npBondAmount').value = '';
-        document.getElementById('npDateStart').value = '';
-        document.getElementById('npDateCompletion').value = '';
-        document.getElementById('npDateMeasurement').value = '';
         document.getElementById('npWorkNameSuggestions').style.display = 'none';
         document.getElementById('npWorkNameSuggestions').innerHTML = '';
         document.getElementById('newProjectModal').style.display = 'flex';
@@ -2525,9 +2489,6 @@
         let billSeq = document.getElementById('npBillSequence').value;
         let billType = document.getElementById('npBillType').value;
         let bondAmount = document.getElementById('npBondAmount').value;
-        let dateStart = document.getElementById('npDateStart').value;
-        let dateCompletion = document.getElementById('npDateCompletion').value;
-        let dateMeasurement = document.getElementById('npDateMeasurement').value;
 
         if(!workName) { showToast('Work Name dalna zaroori hai!'); return; }
 
@@ -2554,7 +2515,7 @@
         let projName = workName.trim().toLowerCase().replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_");
         if(!projName) { showToast('Valid Work Name dalein!'); return; }
 
-        let ok = await createNewProjectWithDetails(projName, workName, bondNo, billSeq, billType, bondAmount, dateStart, dateCompletion, dateMeasurement);
+        let ok = await createNewProjectWithDetails(projName, workName, bondNo, billSeq, billType, bondAmount);
         if(ok) closeNewProjectModal();
     }
     // ========== END COMBINED NEW PROJECT MODAL ==========
@@ -3600,27 +3561,40 @@
         let tr = document.createElement('tr');
         tr.style.background = 'rgba(139,92,246,0.13)';
         tr.style.fontWeight = '700';
+        let dCol = 'class="ledger-detail-col" style="display:' + (ledgerBreakdownVisible ? 'table-cell' : 'none') + ';';
         tr.innerHTML = `
             <td style="text-align:left; padding-left:10px;">
                 🎯 ${billLabel}
                 <span style="font-size:10px; background:rgba(139,92,246,0.3); padding:2px 6px; border-radius:4px; margin-left:6px;">CURRENT</span>
             </td>
             <td>${fmt(gross)}</td>
-            <td style="color:#fbbf24;">${fmt(sd)}</td>
-            <td style="color:#fbbf24;">${fmt(perf)}</td>
-            <td style="color:#f87171;">${fmt(it)}</td>
-            <td style="color:#f87171;">${fmt(sgst)}</td>
-            <td style="color:#f87171;">${fmt(cgst)}</td>
-            <td style="color:#f87171;">${fmt(cess)}</td>
-            <td style="color:#fb923c;">${fmt(royalty)}</td>
-            <td style="color:#a78bfa;">${fmt(dmf)}</td>
-            <td style="color:#fb923c;">${fmt(com)}</td>
-            <td style="color:#fb923c;">${fmt(stamp)}</td>
-            <td style="vertical-align:top;">${extraCell}</td>
+            <td ${dCol} color:#fbbf24;">${fmt(sd)}</td>
+            <td ${dCol} color:#fbbf24;">${fmt(perf)}</td>
+            <td ${dCol} color:#f87171;">${fmt(it)}</td>
+            <td ${dCol} color:#f87171;">${fmt(sgst)}</td>
+            <td ${dCol} color:#f87171;">${fmt(cgst)}</td>
+            <td ${dCol} color:#f87171;">${fmt(cess)}</td>
+            <td ${dCol} color:#fb923c;">${fmt(royalty)}</td>
+            <td ${dCol} color:#a78bfa;">${fmt(dmf)}</td>
+            <td ${dCol} color:#fb923c;">${fmt(com)}</td>
+            <td ${dCol} color:#fb923c;">${fmt(stamp)}</td>
+            <td ${dCol} vertical-align:top;">${extraCell}</td>
             <td style="color:#ef4444; font-weight:800;">${fmt(totalDeduct)}</td>
             <td style="color:#34d399; font-weight:800; font-size:14px;">${fmt(net)}</td>
             <td><span class="status-badge-ms ms-bg-warning">Processing</span></td>`;
         ledgerBody.appendChild(tr);
+    }
+
+    // Controls whether the granular deduction-breakup columns show in the Executive Dashboard ledger.
+    // Defaults to hidden so the ledger reads clean at a glance; the user can expand on demand.
+    let ledgerBreakdownVisible = false;
+    function toggleLedgerBreakdown() {
+        ledgerBreakdownVisible = !ledgerBreakdownVisible;
+        document.querySelectorAll('.ledger-detail-col').forEach(el => {
+            el.style.display = ledgerBreakdownVisible ? (el.tagName === 'TR' ? 'table-row' : 'table-cell') : 'none';
+        });
+        let btn = document.getElementById('ledgerBreakdownToggle');
+        if (btn) btn.innerText = ledgerBreakdownVisible ? '🔼 Hide Full Breakdown' : '🔍 Show Full Breakdown';
     }
 
     function triggerPaymentSync() {
