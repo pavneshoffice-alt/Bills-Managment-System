@@ -1976,6 +1976,18 @@
                 } catch(e) { console.error("Cloud load failed:", e); }
                 return null;
             };
+            window.saveDivisionsIndexToCloud = async function(list) {
+                try {
+                    await setDoc(doc(db,"quantix_portfolio","global_divisions_index"), {index: list});
+                } catch(e) { console.error("Divisions index sync failed:", e); }
+            };
+            window.loadDivisionsIndexFromCloud = async function() {
+                try {
+                    const snap = await getDoc(doc(db,"quantix_portfolio","global_divisions_index"));
+                    if (snap.exists()) return snap.data().index;
+                } catch(e) { console.error("Divisions index load failed:", e); }
+                return null;
+            };
             window.saveProjectIndexToCloud = async function(list, division) {
                 try {
                     let docId = (!division || division === 'default') ? 'global_project_index' : 'global_project_index_' + division.replace(/[^a-zA-Z0-9_]/g,"");
@@ -2153,6 +2165,12 @@
                         _ls.set(key, parsedBackup[key]);
                     });
 
+                    // Push the divisions index itself to the cloud so newly restored divisions
+                    // are visible across all devices/browsers, not just this one.
+                    if (parsedBackup['rwd_divisions_index'] && typeof window.saveDivisionsIndexToCloud === "function") {
+                        try { await window.saveDivisionsIndexToCloud(JSON.parse(parsedBackup['rwd_divisions_index'])); } catch(e) {}
+                    }
+
                     // Push every division's project index (there can be several: rwd_projects_index,
                     // rwd_projects_index_div_<name>, ...) to the cloud correctly scoped by division.
                     if (typeof window.saveProjectIndexToCloud === "function") {
@@ -2274,6 +2292,9 @@
     }
     function saveDivisionsList(list) {
         _ls.set('rwd_divisions_index', JSON.stringify(list));
+        if (typeof window.saveDivisionsIndexToCloud === "function") {
+            window.saveDivisionsIndexToCloud(list);
+        }
     }
     function getActiveDivision() {
         return _ls.get('rwd_active_division') || 'default';
@@ -2286,7 +2307,15 @@
     function projectsIndexKey() { return 'rwd_projects_index' + getDivisionSuffix(); }
 
     async function initDivisionDropdown() {
-        let list = getDivisionsList();
+        let list = null;
+        if (typeof window.loadDivisionsIndexFromCloud === "function") {
+            list = await window.loadDivisionsIndexFromCloud();
+        }
+        if (!list) {
+            list = getDivisionsList();
+        } else {
+            _ls.set('rwd_divisions_index', JSON.stringify(list));
+        }
         let sel = document.getElementById('divisionSelector');
         if(!sel) return;
         sel.innerHTML = '';
