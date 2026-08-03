@@ -1944,6 +1944,18 @@
     </div>
 </div>
 
+<script>
+    // Resolves once the Firebase module below has finished trying to set up cloud sync
+    // (whether it succeeded, failed, or was skipped for file:// mode). Anything that needs
+    // window.saveXxxToCloud / window.loadXxxFromCloud to be ready (e.g. the page's initial
+    // load sequence) should `await window.firebaseReadyPromise` first — otherwise, since the
+    // module script's dynamic imports load over the network asynchronously, window.onload can
+    // fire and call the init functions BEFORE the cloud functions exist, silently falling back
+    // to local-only data (this is what caused newly-added divisions to not show up on other
+    // browsers/devices — the other browser's first load raced ahead of Firebase's setup).
+    window.firebaseReadyPromise = new Promise(resolve => { window._resolveFirebaseReady = resolve; });
+</script>
+
 <script type="module">
     // Firebase cloud sync — only when running from a real server, not file://
     if (window.location.protocol !== 'file:') {
@@ -2003,9 +2015,14 @@
                 return null;
             };
             console.log("✅ Firebase cloud sync ready.");
-        }).catch(e => console.warn("Firebase unavailable, offline mode:", e.message));
+            window._resolveFirebaseReady();
+        }).catch(e => {
+            console.warn("Firebase unavailable, offline mode:", e.message);
+            window._resolveFirebaseReady();
+        });
     } else {
         console.log("📁 file:// mode — localStorage only, cloud sync disabled.");
+        window._resolveFirebaseReady();
     }
 </script>
 
@@ -5035,6 +5052,10 @@
     }
 
     window.onload = async function() {
+        // Wait for Firebase cloud sync setup to finish (success, failure, or file:// skip) before
+        // loading divisions/projects — otherwise a fresh browser/device can race ahead and load
+        // only the empty local list, making cloud-only divisions/projects appear missing.
+        try { await window.firebaseReadyPromise; } catch(e) {}
         try { await initDivisionDropdown(); } catch(e) { console.warn('initDivisionDropdown failed:', e); }
         try { await initProjectDropdown(); } catch(e) { console.warn('initProjectDropdown failed:', e); }
         try { await loadSavedData(); } catch(e) { console.warn('loadSavedData failed:', e); }
