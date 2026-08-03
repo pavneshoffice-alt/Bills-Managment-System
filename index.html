@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1300">
     <title>BILLING AND PAYMENT ENGINE v18.5 (Cloud Synced)</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
@@ -110,8 +110,8 @@
         .pp-subtitle { font-size: 10px; color: var(--text-light); font-weight: 600; }
 
         .pm-select {
-            padding: 7px 12px;
-            border-radius: var(--radius-sm);
+            padding: 7px 14px;
+            border-radius: 999px;
             border: 1px solid var(--border-color);
             background-color: var(--input-bg);
             color: var(--text-dark);
@@ -129,11 +129,11 @@
 
         .pp-bar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-        /* Clean compact action buttons */
+        /* Clean compact action buttons — pill / fully rounded redesign */
         .btn-pm {
-            padding: 7px 13px;
+            padding: 8px 16px;
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: 999px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -143,7 +143,9 @@
             align-items: center;
             gap: 5px;
             white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
         }
+        .btn-pm:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.12); }
         .btn-pm-new { background: var(--primary); color: white; }
         .btn-pm-new:hover { background: var(--primary-dark); transform: translateY(-1px); }
         .btn-pm-bill { background: rgba(124,58,237,0.1); color: #7c3aed; }
@@ -962,6 +964,10 @@
         </h3>
         
         <div style="display:flex; flex-direction:column; gap:16px; margin-top:20px;">
+            <button onclick="closeSettings(); openAddDivisionModal();" style="display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:13px; background:rgba(124,58,237,0.08); padding:10px 14px; border-radius:8px; border:1px solid #7c3aed; cursor:pointer; width:100%; box-sizing:border-box; color:#7c3aed;">
+                <span>📍 Add New Division</span>
+                <span style="font-size:16px;">➕</span>
+            </button>
             <label style="display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:14px; background:var(--bg-main); padding:10px 14px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer;">
                 <span style="color:var(--text-dark);">🔓 Unlock All Abstract Entries</span>
                 <input type="checkbox" id="cfgSettingLock" onchange="toggleAbstractEdit()" style="width:20px; height:20px; accent-color:#34A853;">
@@ -1094,6 +1100,26 @@
     </div>
 </div>
 <!-- ===== END COMBINED NEW PROJECT MODAL ===== -->
+
+<!-- ===== ADD DIVISION MODAL ===== -->
+<div id="addDivisionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100003; justify-content:center; align-items:center;">
+    <div style="background:var(--card-bg); padding:28px; border-radius:16px; width:380px; max-width:90vw; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border-top:6px solid #7c3aed;">
+        <h3 style="margin:0 0 6px 0; font-size:17px; color:var(--text-dark);">➕ Add New Division</h3>
+        <div style="font-size:12px; color:var(--text-light); margin-bottom:16px; line-height:1.6;">
+            Division ek separate workspace hai — jaise "Rudraprayag" ya "Pauri". Is division ke under jitne bhi Projects/Bonds banayenge, wo sirf isi division me dikhenge, doosre divisions se bilkul alag rahenge.
+        </div>
+
+        <label style="font-weight:700; font-size:12px; color:var(--text-dark); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">Division Name</label>
+        <input type="text" id="newDivisionNameInput" placeholder="e.g., Rudraprayag" autocomplete="off"
+            style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-weight:600; font-size:13px; margin-bottom:20px;">
+
+        <div style="display:flex; gap:10px;">
+            <button onclick="closeAddDivisionModal()" style="flex:1; padding:12px; background:var(--neutral-light); color:var(--text-dark); border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px;">Cancel</button>
+            <button onclick="submitAddDivision()" style="flex:2; padding:12px; background:#7c3aed; color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px; box-shadow:0 4px 6px rgba(124,58,237,0.25);">➕ Create Division</button>
+        </div>
+    </div>
+</div>
+<!-- ===== END ADD DIVISION MODAL ===== -->
 
 <!-- ===== NEW BILL MODAL (replaces native prompt/confirm — avoids browser dialog-suppression issues) ===== -->
 <div id="newBillModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100003; justify-content:center; align-items:center;">
@@ -1235,6 +1261,9 @@
                                 <span class="pp-title">PROJECT PORTFOLIO
                                 <span class="pp-subtitle"></span>
                             </div>
+                            <select id="divisionSelector" class="pm-select" style="min-width:150px; border-color:#7c3aed; color:#7c3aed; font-weight:800;" onchange="switchDivision()" title="Division select karein — har division ke bills alag-alag rahenge">
+                                <option value="default">-- No Division --</option>
+                            </select>
                             <select id="projectSelector" class="pm-select" onchange="loadSelectedProject()">
                                 <option value="default">-- Default Project --</option>
                             </select>
@@ -1947,13 +1976,16 @@
                 } catch(e) { console.error("Cloud load failed:", e); }
                 return null;
             };
-            window.saveProjectIndexToCloud = async function(list) {
-                try { await setDoc(doc(db,"quantix_portfolio","global_project_index"), {index: list}); }
-                catch(e) { console.error("Index sync failed:", e); }
-            };
-            window.loadProjectIndexFromCloud = async function() {
+            window.saveProjectIndexToCloud = async function(list, division) {
                 try {
-                    const snap = await getDoc(doc(db,"quantix_portfolio","global_project_index"));
+                    let docId = (!division || division === 'default') ? 'global_project_index' : 'global_project_index_' + division.replace(/[^a-zA-Z0-9_]/g,"");
+                    await setDoc(doc(db,"quantix_portfolio",docId), {index: list});
+                } catch(e) { console.error("Index sync failed:", e); }
+            };
+            window.loadProjectIndexFromCloud = async function(division) {
+                try {
+                    let docId = (!division || division === 'default') ? 'global_project_index' : 'global_project_index_' + division.replace(/[^a-zA-Z0-9_]/g,"");
+                    const snap = await getDoc(doc(db,"quantix_portfolio",docId));
                     if (snap.exists()) return snap.data().index;
                 } catch(e) { console.error("Index load failed:", e); }
                 return null;
@@ -2089,7 +2121,7 @@
         let backupData = {};
         for (let i = 0; i < _ls.length(); i++) {
             let key = _ls.key(i);
-            if (key.startsWith('rwd_billing_v12_master') || key.startsWith('rwd_bill_history') || key === 'rwd_projects_index' || key === 'rwd_active_project') {
+            if (key.startsWith('rwd_billing_v12_master') || key.startsWith('rwd_bill_history') || key.startsWith('rwd_projects_index') || key.startsWith('rwd_active_project') || key === 'rwd_divisions_index' || key === 'rwd_active_division') {
                 backupData[key] = _ls.get(key);
             }
         }
@@ -2116,19 +2148,27 @@
                 let parsedBackup = JSON.parse(e.target.result);
                 if (Object.keys(parsedBackup).length === 0) throw new Error("Empty Backup");
                 
-                if(confirm("सावधान: यह बैकअप आपके वर्तमान सभी प्रोजेक्ट्स को बदल देगा! क्या आप जारी रखना चाहते हैं?")) {
+                showConfirmModal("सावधान: यह बैकअप आपके वर्तमान सभी प्रोजेक्ट्स को बदल देगा! क्या आप जारी रखना चाहते हैं?", async () => {
                     Object.keys(parsedBackup).forEach(key => {
                         _ls.set(key, parsedBackup[key]);
                     });
-                    
-                    if(parsedBackup['rwd_projects_index'] && typeof window.saveProjectIndexToCloud === "function"){
-                        await window.saveProjectIndexToCloud(JSON.parse(parsedBackup['rwd_projects_index']));
+
+                    // Push every division's project index (there can be several: rwd_projects_index,
+                    // rwd_projects_index_div_<name>, ...) to the cloud correctly scoped by division.
+                    if (typeof window.saveProjectIndexToCloud === "function") {
+                        for (let key of Object.keys(parsedBackup)) {
+                            if (key.startsWith('rwd_projects_index')) {
+                                let div = (key === 'rwd_projects_index') ? 'default' : key.replace('rwd_projects_index_div_', '');
+                                try { await window.saveProjectIndexToCloud(JSON.parse(parsedBackup[key]), div); } catch(e) {}
+                            }
+                        }
                     }
-                    
+
                     showToast("📤 पोर्टफोलियो बैकअप सफलतापूर्वक रिस्टोर हो गया!");
+                    await initDivisionDropdown();
                     await initProjectDropdown();
                     await loadSavedData();
-                }
+                });
             } catch (err) {
                 alert("त्रुटि: अमान्य बैकअप फाइल!");
             }
@@ -2225,26 +2265,104 @@
         });
     }
 
+    // ===== DIVISION MANAGEMENT (top-level grouping above Projects — e.g. "Rudraprayag Division") =====
+    // A division fully isolates all projects/bills under it. Default install has a single implicit
+    // "default" division so existing single-division users are completely unaffected (all key names
+    // resolve identically to before when division === 'default').
+    function getDivisionsList() {
+        try { return JSON.parse(_ls.get('rwd_divisions_index') || '["default"]'); } catch(e) { return ['default']; }
+    }
+    function saveDivisionsList(list) {
+        _ls.set('rwd_divisions_index', JSON.stringify(list));
+    }
+    function getActiveDivision() {
+        return _ls.get('rwd_active_division') || 'default';
+    }
+    function getDivisionSuffix() {
+        let div = getActiveDivision();
+        return div === 'default' ? '' : '_div_' + div.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    }
+    function activeProjectKey() { return 'rwd_active_project' + getDivisionSuffix(); }
+    function projectsIndexKey() { return 'rwd_projects_index' + getDivisionSuffix(); }
+
+    async function initDivisionDropdown() {
+        let list = getDivisionsList();
+        let sel = document.getElementById('divisionSelector');
+        if(!sel) return;
+        sel.innerHTML = '';
+        list.forEach(d => {
+            let opt = document.createElement('option');
+            opt.value = d;
+            opt.innerText = d === 'default' ? '-- No Division --' : d.toUpperCase() + ' DIVISION';
+            sel.appendChild(opt);
+        });
+        let currentActive = getActiveDivision();
+        if (list.includes(currentActive)) {
+            sel.value = currentActive;
+        } else {
+            sel.value = 'default';
+            _ls.set('rwd_active_division', 'default');
+        }
+    }
+
+    // Switches the active division: reloads the project dropdown scoped to it, and loads
+    // whichever project was last active there (or the default blank project if it's brand-new).
+    async function switchDivision() {
+        let sel = document.getElementById('divisionSelector');
+        _ls.set('rwd_active_division', sel.value);
+        await initProjectDropdown();
+        await loadSavedData();
+        let divLabel = sel.value === 'default' ? 'No Division' : sel.value.toUpperCase() + ' Division';
+        showToast('📍 Switched to: ' + divLabel);
+    }
+
+    function openAddDivisionModal() {
+        document.getElementById('newDivisionNameInput').value = '';
+        document.getElementById('addDivisionModal').style.display = 'flex';
+    }
+    function closeAddDivisionModal() {
+        document.getElementById('addDivisionModal').style.display = 'none';
+    }
+    async function submitAddDivision() {
+        let nameInput = document.getElementById('newDivisionNameInput').value;
+        if(!nameInput || !nameInput.trim()) { showToast('⚠️ Division ka naam likhein.'); return; }
+        let cleanName = nameInput.trim().toLowerCase().replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_");
+        if(!cleanName) { showToast('⚠️ Valid division naam likhein.'); return; }
+
+        let list = getDivisionsList();
+        if(!list.includes(cleanName)) {
+            list.push(cleanName);
+            saveDivisionsList(list);
+        }
+        _ls.set('rwd_active_division', cleanName);
+        closeAddDivisionModal();
+        await initDivisionDropdown();
+        document.getElementById('divisionSelector').value = cleanName;
+        await initProjectDropdown();
+        await loadSavedData();
+        showToast('📍 "' + cleanName.toUpperCase() + '" Division ban gaya hai! Ab is division ke under "➕ New Project" se project banayein.');
+    }
+
     function getProjectsList() {
-        try { return JSON.parse(_ls.get('rwd_projects_index') || '["default"]'); } catch(e) { return ['default']; }
+        try { return JSON.parse(_ls.get(projectsIndexKey()) || '["default"]'); } catch(e) { return ['default']; }
     }
 
     function saveProjectsList(list) {
-        _ls.set('rwd_projects_index', JSON.stringify(list));
+        _ls.set(projectsIndexKey(), JSON.stringify(list));
         if (typeof window.saveProjectIndexToCloud === "function") {
-            window.saveProjectIndexToCloud(list);
+            window.saveProjectIndexToCloud(list, getActiveDivision());
         }
     }
 
     async function initProjectDropdown() {
         let list = null;
         if(typeof window.loadProjectIndexFromCloud === "function"){
-            list = await window.loadProjectIndexFromCloud();
+            list = await window.loadProjectIndexFromCloud(getActiveDivision());
         }
         if(!list) {
             list = getProjectsList();
         } else {
-            _ls.set('rwd_projects_index', JSON.stringify(list));
+            _ls.set(projectsIndexKey(), JSON.stringify(list));
         }
 
         let sel = document.getElementById('projectSelector');
@@ -2257,12 +2375,12 @@
             sel.appendChild(opt);
         });
         
-        let currentActive = _ls.get('rwd_active_project') || 'default';
+        let currentActive = _ls.get(activeProjectKey()) || 'default';
         if (list.includes(currentActive)) {
             sel.value = currentActive;
         } else {
             sel.value = 'default';
-            _ls.set('rwd_active_project', 'default');
+            _ls.set(activeProjectKey(), 'default');
         }
     }
 
@@ -2280,7 +2398,7 @@
                 list.push(currentName);
                 saveProjectsList(list);
             }
-            _ls.set('rwd_active_project', currentName);
+            _ls.set(activeProjectKey(), currentName);
             await initProjectDropdown();
             sel.value = currentName;
         }
@@ -2300,7 +2418,7 @@
 
         list.push(projName);
         saveProjectsList(list);
-        _ls.set('rwd_active_project', projName);
+        _ls.set(activeProjectKey(), projName);
         
         document.getElementById('globalWorkName').value = workName || '';
         document.getElementById('globalBondNo').value = bondNo || '';
@@ -2391,7 +2509,7 @@
         let records = [];
         list.forEach(projKey => {
             let cleanSuffix = projKey.trim().toLowerCase().replace(/[^a-zA-Z0-9_]/g, "");
-            let suffix = cleanSuffix === 'default' ? '' : '_' + cleanSuffix;
+            let suffix = getDivisionSuffix() + (cleanSuffix === 'default' ? '' : '_' + cleanSuffix);
             try {
                 let raw = _ls.get('rwd_billing_v12_master' + suffix);
                 if(!raw) return;
@@ -2476,7 +2594,7 @@
     // instead of creating a duplicate project.
     async function useExistingWorkForNextBill(projKey) {
         closeNewProjectModal();
-        _ls.set('rwd_active_project', projKey);
+        _ls.set(activeProjectKey(), projKey);
         await initProjectDropdown();
         await loadSavedData();
         newBillSameProject();
@@ -2533,9 +2651,10 @@
             list = list.filter(item => item !== currentName);
             saveProjectsList(list);
             
-            let cleanDeleteSuffix = currentName.trim().toLowerCase().replace(/[^a-zA-Z0-9_]/g, ""); _ls.remove('rwd_billing_v12_master_' + cleanDeleteSuffix);
-            _ls.remove('rwd_bill_history_' + cleanDeleteSuffix);
-            _ls.set('rwd_active_project', 'default');
+            let suffixToDelete = getDivisionSuffix() + '_' + currentName.trim().toLowerCase().replace(/[^a-zA-Z0-9_]/g, "");
+            _ls.remove('rwd_billing_v12_master' + suffixToDelete);
+            _ls.remove('rwd_bill_history' + suffixToDelete);
+            _ls.set(activeProjectKey(), 'default');
             
             await initProjectDropdown();
             await loadSavedData();
@@ -2545,7 +2664,7 @@
 
     async function loadSelectedProject() {
         let sel = document.getElementById('projectSelector');
-        _ls.set('rwd_active_project', sel.value);
+        _ls.set(activeProjectKey(), sel.value);
         await loadSavedData();
         showToast("📂 प्रोजेक्ट लोड हो गया!");
     }
@@ -3893,8 +4012,9 @@
     }
 
     function getActiveProjectSuffix() {
-        let currentActive = _ls.get('rwd_active_project') || 'default';
-        return currentActive === 'default' ? '' : '_' + currentActive;
+        let currentActive = _ls.get(activeProjectKey()) || 'default';
+        let projSfx = currentActive === 'default' ? '' : '_' + currentActive;
+        return getDivisionSuffix() + projSfx;
     }
 
     // ===== Generic custom confirm modal (replaces native confirm() everywhere in history features) =====
@@ -3978,11 +4098,43 @@
         let hist = getBillHistory();
         let workName = document.getElementById('globalWorkName').value || 'This Project';
         let bondNo = document.getElementById('globalBondNo').value || '(no bond no)';
-        document.getElementById('billHistoryInfo').innerHTML = '<b style="color:var(--text-dark);">' + workName + '</b> &nbsp;•&nbsp; Bond No: <b style="color:var(--text-dark);">' + bondNo + '</b> &nbsp;•&nbsp; ' + hist.length + ' bill' + (hist.length === 1 ? '' : 's') + ' saved';
+        document.getElementById('billHistoryInfo').innerHTML = '<b style="color:var(--text-dark);">' + workName + '</b> &nbsp;•&nbsp; Bond No: <b style="color:var(--text-dark);">' + bondNo + '</b> &nbsp;•&nbsp; ' + (hist.length + 1) + ' bill' + (hist.length === 0 ? '' : 's') + ' total (including current)';
+
+        let fmt2 = (v) => (v||0).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+        // ---- Always show the CURRENTLY OPEN/LIVE bill as the first card, so every bill for this
+        // bond (past + current) is visible in one place, not just the archived ones. ----
+        let curSeq  = document.getElementById('globalBillSequence').value;
+        let curType = document.getElementById('globalBillType').value;
+        let curGross = parseFloat(document.getElementById('pThisBillGross').innerText) || 0;
+        let curDeductions = parseFloat(document.getElementById('lblTotalDeductions').innerText) || 0;
+        let curNet = parseFloat(document.getElementById('lblActualNetPayableContractor').innerText) || 0;
+
+        let currentCardHtml = `
+        <div style="border:2px solid #059669; border-radius:12px; padding:14px 16px; background:rgba(5,150,105,0.06); margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="background:#059669; color:white; font-weight:800; font-size:11px; padding:5px 10px; border-radius:20px; letter-spacing:0.3px; white-space:nowrap;">🟢 LIVE — ${curSeq} ${curType}</span>
+                    <span style="font-size:11px; color:var(--text-light);">Currently open / being edited</span>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:10px; color:var(--text-light); text-transform:uppercase; letter-spacing:0.5px;">Net Payable</div>
+                    <div style="font-size:16px; font-weight:800; color:#059669;">₹ ${fmt2(curNet)}</div>
+                </div>
+            </div>
+            <div style="display:flex; gap:18px; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(5,150,105,0.3); font-size:11.5px; color:var(--text-light);">
+                <span>Gross: <b style="color:var(--text-dark);">₹ ${fmt2(curGross)}</b></span>
+                <span>Deductions: <b style="color:var(--text-dark);">₹ ${fmt2(curDeductions)}</b></span>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+                <button onclick="document.getElementById('billHistoryModal').style.display='none';" style="flex:1; background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; border-radius:999px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">👁 Go To Current Bill</button>
+                <button onclick="updateCurrentBillHistoryRecord()" style="flex:1; background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; border-radius:999px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">💾 Save/Update Record</button>
+            </div>
+        </div>`;
 
         let body = document.getElementById('billHistoryBody');
         if(hist.length === 0) {
-            body.innerHTML = `<div style="padding:40px 16px; text-align:center; color:var(--text-light);">
+            body.innerHTML = currentCardHtml + `<div style="padding:24px 16px; text-align:center; color:var(--text-light);">
                 <div style="font-size:34px; margin-bottom:10px;">📭</div>
                 <div style="font-size:13px;">Abhi tak koi purana bill record nahi hai — jaise hi "New Bill" se agla bill banayenge, is bill ka record yahan save ho jayega.</div>
             </div>`;
@@ -3994,7 +4146,7 @@
             let sortedEntries = hist.map((h, originalIdx) => ({ h, originalIdx }))
                 .sort((a, b) => allSeq.indexOf(a.h.seq) - allSeq.indexOf(b.h.seq));
 
-            body.innerHTML = sortedEntries.map(({h, originalIdx}) => {
+            body.innerHTML = currentCardHtml + sortedEntries.map(({h, originalIdx}) => {
                 let isFinal = h.type === 'Final';
                 let fmt2 = (v) => (v||0).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
                 return `
@@ -4018,9 +4170,9 @@
                     </div>
 
                     <div style="display:flex; gap:8px; margin-top:12px;">
-                        <button onclick="viewBillHistoryDetail(${originalIdx})" style="flex:1; background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; border-radius:8px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">👁 View</button>
-                        <button onclick="editBillHistoryEntry(${originalIdx})" style="flex:1; background:#fffbeb; color:#b45309; border:1px solid #fde68a; border-radius:8px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">✏️ Edit</button>
-                        <button onclick="deleteBillHistoryEntry(${originalIdx})" style="flex:1; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:8px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">✖ Remove</button>
+                        <button onclick="viewBillHistoryDetail(${originalIdx})" style="flex:1; background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; border-radius:999px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">👁 View</button>
+                        <button onclick="editBillHistoryEntry(${originalIdx})" style="flex:1; background:#fffbeb; color:#b45309; border:1px solid #fde68a; border-radius:999px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">✏️ Edit</button>
+                        <button onclick="deleteBillHistoryEntry(${originalIdx})" style="flex:1; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:999px; padding:7px 10px; cursor:pointer; font-size:11.5px; font-weight:700;">✖ Remove</button>
                     </div>
                 </div>
             `;
@@ -4123,7 +4275,7 @@
 
         let html = `<div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-light); margin-bottom:16px;">
             <span>Bond No: <b>${h.bondNo || '-'}</b> &nbsp;|&nbsp; Saved On: <b>${h.date || '-'}</b></span>
-            <button onclick="editBillHistoryEntry(${idx})" style="background:#f59e0b; color:white; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; font-size:12px; font-weight:700;">✏️ Edit This Bill</button>
+            <button onclick="editBillHistoryEntry(${idx})" style="background:#f59e0b; color:white; border:none; border-radius:999px; padding:6px 12px; cursor:pointer; font-size:12px; font-weight:700;">✏️ Edit This Bill</button>
         </div>`;
 
         // ---- Bill Abstract (Tab 2) ----
@@ -4193,10 +4345,10 @@
 
     // 🌐 INTEGRATED LOCAL AND CLOUD SAVE SYSTEM
     async function saveAllData(targetProject = null) {
-        let currentActive = _ls.get('rwd_active_project') || 'default';
+        let currentActive = _ls.get(activeProjectKey()) || 'default';
         let rawSuffix = targetProject ? targetProject : currentActive;
         let cleanSuffix = rawSuffix.trim().toLowerCase().replace(/[^a-zA-Z0-9_]/g, "");
-        let suffix = cleanSuffix === 'default' ? '' : '_' + cleanSuffix;
+        let suffix = getDivisionSuffix() + (cleanSuffix === 'default' ? '' : '_' + cleanSuffix);
 
         let dataObj = {
             workName: document.getElementById('globalWorkName').value,
@@ -4299,9 +4451,9 @@
         isEditingHistoryBill = false;
         updateSaveUpdateBillButtonVisibility();
 
-        let currentActive = _ls.get('rwd_active_project') || 'default';
+        let currentActive = _ls.get(activeProjectKey()) || 'default';
         let cleanSuffix = currentActive.trim().toLowerCase().replace(/[^a-zA-Z0-9_]/g, "");
-        let suffix = cleanSuffix === 'default' ? '' : '_' + cleanSuffix;
+        let suffix = getDivisionSuffix() + (cleanSuffix === 'default' ? '' : '_' + cleanSuffix);
         let dataObj = null;
 
         let badge = document.getElementById('autosaveBadge');
@@ -4548,7 +4700,7 @@
     // 🚀 STABLE ASYNC INITIALIZATION ON WINDOW LOAD
     // ========== MEASUREMENT SNAPSHOT SYSTEM ==========
     function getMeasurementSnapshotKey() {
-        let active = _ls.get('rwd_active_project') || 'default';
+        let active = _ls.get(activeProjectKey()) || 'default';
         return 'rwd_msnap_' + active;
     }
 
@@ -4799,6 +4951,16 @@
             rate: r.rate
         }));
 
+        // ---- 2b) Royalty carry-forward (same idea as Bill Abstract, applied to the Royalty tab) ----
+        // The closed bill's cumulative "Overall Royalty Qty" becomes the new bill's "Last Overall Royalty Qty",
+        // and each material's cumulative Gross Royalty becomes the new bill's "Last Deduction" baseline —
+        // so the contractor/engineer never has to manually re-type these carry-forward figures.
+        let prevOverallRoyaltyQty = document.getElementById('overallRoyaltyQty').innerText;
+        let prevGrossSand  = document.getElementById('grossSandRoyalty').innerText;
+        let prevGrossGrit  = document.getElementById('grossGritRoyalty').innerText;
+        let prevGrossStone = document.getElementById('grossStoneRoyalty').innerText;
+        let wasOverallCalcEnabled = document.getElementById('chkEnableOverallCalc').checked;
+
         // Update bill sequence only
         seqEl.value = nextSeq;
         typeEl.value = billKind;
@@ -4812,6 +4974,17 @@
         if(carryForwardRows.length > 0) { carryForwardRows.forEach(r => addSingleRowTab2(r)); } else { addSingleRowTab2(); }
         addSingleRowTab3();
 
+        // Apply the royalty carry-forward captured above (step 2b)
+        document.getElementById('lastOverallRoyaltyQty').value = prevOverallRoyaltyQty;
+        document.getElementById('deductSand').value  = prevGrossSand;
+        document.getElementById('deductGrit').value  = prevGrossGrit;
+        document.getElementById('deductStone').value = prevGrossStone;
+        document.getElementById('chkEnableOverallCalc').checked = wasOverallCalcEnabled;
+        toggleOverallCalcVisibility();
+        document.getElementById('manualDeductCheckbox').checked = false;
+        toggleManualDeductOverride();
+        updateRoyaltyTotals();
+
         // Clear payment fields for new bill
         document.getElementById('pDmfManual').value = '';
         document.getElementById('pComManual').value = '';
@@ -4819,7 +4992,6 @@
         document.getElementById('pRoyaltyManual').value = '';
         document.getElementById('pSecDepositManual').value = '';
         document.getElementById('pPerfSecurityManual').value = '';
-        document.getElementById('txtLastBillDeductGrand').value = '';
         document.querySelector('#dynamicDeductionsTable tbody').innerHTML = '';
 
         reindexTableSerialNumbers('calcTable');
@@ -4834,6 +5006,7 @@
     }
 
     window.onload = async function() {
+        try { await initDivisionDropdown(); } catch(e) { console.warn('initDivisionDropdown failed:', e); }
         try { await initProjectDropdown(); } catch(e) { console.warn('initProjectDropdown failed:', e); }
         try { await loadSavedData(); } catch(e) { console.warn('loadSavedData failed:', e); }
         try { refreshSnapshotDropdown(); } catch(e) {}
