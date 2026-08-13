@@ -185,6 +185,23 @@
         .pp-more-item .pp-more-ico { width: 18px; text-align: center; flex-shrink: 0; }
         .pp-more-divider { height: 1px; background: var(--border-color); margin: 4px 2px; }
 
+        /* Manage Divisions — floating dropdown list inside Settings */
+        .div-manage-wrap { position: relative; }
+        .div-manage-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px); left: 0; right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
+            z-index: 500;
+            max-height: 240px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .div-manage-dropdown.open { display: flex; flex-direction: column; gap: 6px; }
+
         /* LIVE SYNC AUTOSAVE INDICATOR */
         .autosave-status-badge {
             font-size: 11px;
@@ -968,6 +985,14 @@
                 <span>📍 Add New Division</span>
                 <span style="font-size:16px;">➕</span>
             </button>
+
+            <div class="div-manage-wrap">
+                <button onclick="toggleDivisionManageList()" style="display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:13px; background:var(--bg-main); padding:10px 14px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer; width:100%; box-sizing:border-box; color:var(--text-dark);">
+                    <span>📋 Manage Divisions</span>
+                    <span id="divManageChevron" style="font-size:12px; transition:transform 0.2s;">▾</span>
+                </button>
+                <div id="divisionManageList" class="div-manage-dropdown"></div>
+            </div>
             <label style="display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:14px; background:var(--bg-main); padding:10px 14px; border-radius:8px; border:1px solid var(--border-color); cursor:pointer;">
                 <span style="color:var(--text-dark);">🔓 Unlock All Abstract Entries</span>
                 <input type="checkbox" id="cfgSettingLock" onchange="toggleAbstractEdit()" style="width:20px; height:20px; accent-color:#34A853;">
@@ -1196,6 +1221,19 @@
 </div>
 <!-- ===== END GENERIC CONFIRM MODAL ===== -->
 
+<!-- ===== GENERIC PROMPT MODAL (replaces native prompt() — avoids browser dialog-suppression issues) ===== -->
+<div id="genericPromptModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:100006; justify-content:center; align-items:center;">
+    <div style="background:var(--card-bg); padding:26px; border-radius:16px; width:380px; max-width:92vw; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); border-top:6px solid var(--primary);">
+        <div id="genericPromptTitle" style="font-size:14px; font-weight:800; color:var(--text-dark); margin-bottom:14px;"></div>
+        <input type="text" id="genericPromptInput" autocomplete="off" style="width:100%; box-sizing:border-box; padding:11px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-dark); font-size:14px; font-weight:700; margin-bottom:18px;" onkeydown="if(event.key==='Enter'){_genericPromptOk();}">
+        <div style="display:flex; gap:10px;">
+            <button onclick="_genericPromptCancel()" style="flex:1; padding:12px; background:var(--neutral-light); color:var(--text-dark); border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px;">Cancel</button>
+            <button onclick="_genericPromptOk()" style="flex:1; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:13px;">✅ OK</button>
+        </div>
+    </div>
+</div>
+<!-- ===== END GENERIC PROMPT MODAL ===== -->
+
 <div class="container">
     <h2>BILLING AND PAYMENT ENGINE</h2>
     <div class="subtitle">By Pavnesh v18.5</div>
@@ -1273,6 +1311,7 @@
                             <button class="btn-pm btn-pm-new" onclick="openNewProjectModal()">➕ New Project</button>
                             <button class="btn-pm btn-pm-bill" id="btnNewBillSameProject" onclick="newBillSameProject()" title="Same project ka naya bill — Bill Sequence badlega">🔁 New Bill</button>
                             <button class="btn-pm btn-solid btn-solid-indigo" onclick="openBillHistoryModal()" title="Is bond/work ke purane bills ka record dekhein">📜 Bill History</button>
+                            <button class="btn-pm btn-solid btn-solid-amber" onclick="renameCurrentProject()" title="Is project ka naam badlein">✏ Rename</button>
                             <button class="btn-pm btn-pm-delete" onclick="deleteCurrentProject()">✖ Delete</button>
 
                             <div id="autosaveBadge" class="autosave-status-badge synced">✓ System Synced</div>
@@ -1725,7 +1764,7 @@
                                     <input type="number" id="cfgReleasedAmt" class="budget-input" value="0.00" step="0.01" onfocus="saveState()" oninput="triggerPaymentSync(); triggerLiveAutoSave();">
                                 </div>
                                 <div class="budget-item">
-                                    <span class="budget-label" style="color: #ff914d; font-weight: bold;">Actual Available Fund (₹) [Manual]</span>
+                                    <span class="budget-label" style="color: #fee821; font-weight: bold;">Actual Available Fund (₹)</span>
                                     <input type="number" id="cfgActualAvailableFund" class="budget-input budget-input-manual" value="0.00" step="0.01" onfocus="saveState()" oninput="triggerPaymentSync(); triggerLiveAutoSave();">
                                 </div>
                                 <div class="budget-item">
@@ -1737,7 +1776,7 @@
                                     <span id="lblBudgetBalance" class="budget-display" style="color: #34d399; border-color: rgba(16,185,129,0.3);">0.00</span>
                                 </div>
                                 <div class="budget-item">
-                                    <span class="budget-label" style="color: #ec4899;">Contingency Expenditure (₹)</span>
+                                    <span class="budget-label" style="color: #ec4899;">other Expenditure (₹)</span>
                                     <span id="lblBudgetContingency" class="budget-display" style="color: #ec4899; border-color: rgba(236,72,153,0.3);">0.00</span>
                                 </div>
                             </div>
@@ -1814,7 +1853,7 @@
                         </div>
 
                         <div style="border-top: 1px dashed var(--border-color); margin-top: 6px; padding-top: 6px;">
-                            <span style="font-size: 12px; font-weight: bold; color: #ea580c;">⚠️ Extra Deductions Grid:</span>
+                            <span style="font-size: 12px; font-weight: bold; color: #7fea0c;">⚠️ Extra Deductions Grid:</span>
                             <table class="dynamic-deduct-table" id="dynamicDeductionsTable">
                                 <thead>
                                     <tr>
@@ -2057,6 +2096,11 @@
     }
 
     function openSettings() {
+        renderDivisionManageList();
+        let listEl = document.getElementById('divisionManageList');
+        let chev = document.getElementById('divManageChevron');
+        if (listEl) listEl.classList.remove('open');
+        if (chev) chev.style.transform = 'rotate(0deg)';
         document.getElementById('cfgSettingLock').checked = abstractEditable;
         document.getElementById('globalSettingsModal').style.display = 'flex';
     }
@@ -2362,6 +2406,144 @@
         showToast('📍 Switched to: ' + divLabel);
     }
 
+    function toggleDivisionManageList() {
+        let listEl = document.getElementById('divisionManageList');
+        let chev = document.getElementById('divManageChevron');
+        if (!listEl) return;
+        let isOpen = listEl.classList.contains('open');
+        if (isOpen) {
+            listEl.classList.remove('open');
+            if (chev) chev.style.transform = 'rotate(0deg)';
+        } else {
+            renderDivisionManageList();
+            listEl.classList.add('open');
+            if (chev) chev.style.transform = 'rotate(180deg)';
+        }
+    }
+    document.addEventListener('click', function(e) {
+        let wrap = document.querySelector('.div-manage-wrap');
+        let listEl = document.getElementById('divisionManageList');
+        let chev = document.getElementById('divManageChevron');
+        if (!wrap || !listEl || !listEl.classList.contains('open')) return;
+        if (!wrap.contains(e.target)) {
+            listEl.classList.remove('open');
+            if (chev) chev.style.transform = 'rotate(0deg)';
+        }
+    });
+
+    // Renders the "Manage Divisions" list inside Settings — every division except the implicit
+    // "default" one, each with a Rename (✏️) and Delete (🗑️) action.
+    function renderDivisionManageList() {
+        let container = document.getElementById('divisionManageList');
+        if (!container) return;
+        let list = getDivisionsList().filter(d => d !== 'default');
+        if (list.length === 0) {
+            container.innerHTML = '<div style="font-size:12px; color:var(--text-light); text-align:center; padding:6px 0;">कोई division नहीं बनाया गया।</div>';
+            return;
+        }
+        container.innerHTML = list.map(d => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); padding:8px 10px; border-radius:8px; border:1px solid var(--border-color);">
+                <span style="font-weight:700; font-size:12px; color:var(--text-dark); word-break:break-all;">📍 ${d.toUpperCase()}</span>
+                <span style="display:flex; gap:6px; flex-shrink:0;">
+                    <button onclick="renameDivisionPrompt('${d}')" title="Division ka naam badlein" style="background:none; border:1px solid #d97706; color:#d97706; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; font-weight:700;">✏️</button>
+                    <button onclick="deleteDivisionPrompt('${d}')" title="Division delete karein" style="background:none; border:1px solid var(--danger); color:var(--danger); border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; font-weight:700;">🗑️</button>
+                </span>
+            </div>
+        `).join('');
+    }
+
+    // Moves every localStorage key scoped to a division (its own data + every project under it)
+    // from an old division-suffix to a new one. Matches only exact/prefixed keys (never a loose
+    // substring) so a division like "north" can never accidentally sweep up "northeast" data.
+    function _moveDivisionScopedKeys(oldSuffix, newSuffix) {
+        const prefixes = ['rwd_billing_v12_master', 'rwd_bill_history', 'rwd_active_project', 'rwd_projects_index'];
+        let allKeys = [];
+        for (let i = 0; i < _ls.length(); i++) allKeys.push(_ls.key(i));
+        allKeys.forEach(k => {
+            if (!k) return;
+            prefixes.forEach(prefix => {
+                let oldFull = prefix + oldSuffix;
+                if (k === oldFull || k.indexOf(oldFull + '_') === 0) {
+                    let newKey = prefix + newSuffix + k.slice(oldFull.length);
+                    let val = _ls.get(k);
+                    if (val !== null) _ls.set(newKey, val);
+                    _ls.remove(k);
+                }
+            });
+        });
+    }
+
+    // Removes every localStorage key scoped to a division (its own data + every project under it).
+    function _removeDivisionScopedKeys(suffix) {
+        const prefixes = ['rwd_billing_v12_master', 'rwd_bill_history', 'rwd_active_project', 'rwd_projects_index'];
+        let allKeys = [];
+        for (let i = 0; i < _ls.length(); i++) allKeys.push(_ls.key(i));
+        allKeys.forEach(k => {
+            if (!k) return;
+            prefixes.forEach(prefix => {
+                let full = prefix + suffix;
+                if (k === full || k.indexOf(full + '_') === 0) _ls.remove(k);
+            });
+        });
+    }
+
+    async function renameDivisionPrompt(oldName) {
+        if (oldName === 'default') { showToast('⚠️ Default division ka naam nahi badla ja sakta.'); return; }
+        showPromptModal('📍 Division का नया नाम दर्ज करें', oldName.toUpperCase(), async function(nameInput) {
+            if (!nameInput || !nameInput.trim()) return;
+            let newName = nameInput.trim().toLowerCase().replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_");
+            if (!newName) { showToast('⚠️ Valid division naam likhein.'); return; }
+            if (newName === oldName) return;
+
+            let list = getDivisionsList();
+            if (list.includes(newName)) { showToast('⚠️ इस नाम का division पहले से मौजूद है!'); return; }
+
+            let oldSuffix = '_div_' + oldName;
+            let newSuffix = '_div_' + newName;
+            _moveDivisionScopedKeys(oldSuffix, newSuffix);
+
+            list = list.map(d => d === oldName ? newName : d);
+            saveDivisionsList(list);
+
+            let wasActive = (getActiveDivision() === oldName);
+            if (wasActive) _ls.set('rwd_active_division', newName);
+
+            if (typeof window.saveProjectIndexToCloud === "function") {
+                try {
+                    let projList = JSON.parse(_ls.get('rwd_projects_index' + newSuffix) || '["default"]');
+                    window.saveProjectIndexToCloud(projList, newName);
+                } catch(e) {}
+            }
+
+            await initDivisionDropdown();
+            let divSel = document.getElementById('divisionSelector');
+            if (divSel && wasActive) divSel.value = newName;
+            await initProjectDropdown();
+            await loadSavedData();
+            renderDivisionManageList();
+            showToast('✏ Division का नाम बदलकर "' + newName.toUpperCase() + '" कर दिया गया!');
+        });
+    }
+
+    async function deleteDivisionPrompt(divName) {
+        if (divName === 'default') { showToast('⚠️ Default division ko delete nahi kiya ja sakta.'); return; }
+        showConfirmModal('क्या आप सचमुच division "' + divName.toUpperCase() + '" को डिलीट करना चाहते हैं?\n\nइसके अंदर के सभी Projects और Bills भी हमेशा के लिए डिलीट हो जाएंगे!', async function() {
+            _removeDivisionScopedKeys('_div_' + divName);
+
+            let list = getDivisionsList().filter(d => d !== divName);
+            saveDivisionsList(list);
+
+            let wasActive = (getActiveDivision() === divName);
+            if (wasActive) _ls.set('rwd_active_division', 'default');
+
+            await initDivisionDropdown();
+            await initProjectDropdown();
+            await loadSavedData();
+            renderDivisionManageList();
+            showToast('🗑 Division "' + divName.toUpperCase() + '" डिलीट कर दिया गया!');
+        });
+    }
+
     function openAddDivisionModal() {
         document.getElementById('newDivisionNameInput').value = '';
         document.getElementById('addDivisionModal').style.display = 'flex';
@@ -2386,6 +2568,7 @@
         document.getElementById('divisionSelector').value = cleanName;
         await initProjectDropdown();
         await loadSavedData();
+        renderDivisionManageList();
         showToast('📍 "' + cleanName.toUpperCase() + '" Division ban gaya hai! Ab is division ke under "➕ New Project" se project banayein.');
     }
 
@@ -2706,6 +2889,47 @@
             await loadSavedData();
             showToast("✖ प्रोजेक्ट डिलीट कर दिया गया है!");
         }
+    }
+
+    // Renames the currently-active project. The form fields already hold this project's live
+    // data, so after moving its stored keys we simply re-save under the new name (which also
+    // re-pushes the data to cloud sync under the new key).
+    async function renameCurrentProject() {
+        let sel = document.getElementById('projectSelector');
+        let currentName = sel.value;
+        if (currentName === 'default') {
+            showToast('⚠️ Default project ka naam nahi badla ja sakta! Pehle "➕ New Project" se ek naya project banayein.');
+            return;
+        }
+        showPromptModal('✏ प्रोजेक्ट का नया नाम दर्ज करें', currentName.toUpperCase(), async function(nameInput) {
+            if (!nameInput || !nameInput.trim()) return;
+            let newName = nameInput.trim().toLowerCase().replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_");
+            if (!newName) { showToast('⚠️ Valid प्रोजेक्ट naam likhein.'); return; }
+            if (newName === currentName) return;
+
+            let list = getProjectsList();
+            if (list.includes(newName)) { showToast('⚠️ इस नाम का प्रोजेक्ट पहले से मौजूद है!'); return; }
+
+            let divSuffix = getDivisionSuffix();
+            let oldSuffix = divSuffix + '_' + currentName;
+            let newSuffix = divSuffix + '_' + newName;
+
+            let historyVal = _ls.get('rwd_bill_history' + oldSuffix);
+            if (historyVal !== null) {
+                _ls.set('rwd_bill_history' + newSuffix, historyVal);
+                _ls.remove('rwd_bill_history' + oldSuffix);
+            }
+            _ls.remove('rwd_billing_v12_master' + oldSuffix);
+
+            list = list.map(p => p === currentName ? newName : p);
+            saveProjectsList(list);
+            _ls.set(activeProjectKey(), newName);
+
+            await saveAllData(newName);
+            await initProjectDropdown();
+            sel.value = newName;
+            showToast('✏ प्रोजेक्ट का नाम बदलकर "' + newName.toUpperCase() + '" कर दिया गया!');
+        });
     }
 
     async function loadSelectedProject() {
@@ -4079,6 +4303,28 @@
     function _genericConfirmNo() {
         document.getElementById('genericConfirmModal').style.display = 'none';
         _pendingConfirmCallback = null;
+    }
+
+    // ===== Generic custom prompt modal (replaces native prompt() — same dialog-suppression fix) =====
+    let _pendingPromptCallback = null;
+    function showPromptModal(title, defaultValue, onOk) {
+        document.getElementById('genericPromptTitle').innerText = title;
+        let input = document.getElementById('genericPromptInput');
+        input.value = defaultValue || '';
+        _pendingPromptCallback = onOk;
+        document.getElementById('genericPromptModal').style.display = 'flex';
+        setTimeout(() => { input.focus(); input.select(); }, 60);
+    }
+    function _genericPromptOk() {
+        let val = document.getElementById('genericPromptInput').value;
+        document.getElementById('genericPromptModal').style.display = 'none';
+        let cb = _pendingPromptCallback;
+        _pendingPromptCallback = null;
+        if (cb) cb(val);
+    }
+    function _genericPromptCancel() {
+        document.getElementById('genericPromptModal').style.display = 'none';
+        _pendingPromptCallback = null;
     }
 
     // ===== BILL HISTORY (record of every past bill, per bond/project) =====
