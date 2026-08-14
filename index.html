@@ -1853,7 +1853,7 @@
                         </div>
 
                         <div style="border-top: 1px dashed var(--border-color); margin-top: 6px; padding-top: 6px;">
-                            <span style="font-size: 12px; font-weight: bold; color: #7fea0c;">⚠️ Extra Deductions Grid:</span>
+                            <span style="font-size: 12px; font-weight: bold; color: #ea0ca0;">⚠️ Other Deductions Grid:</span>
                             <table class="dynamic-deduct-table" id="dynamicDeductionsTable">
                                 <thead>
                                     <tr>
@@ -2025,6 +2025,20 @@
                     const snap = await getDoc(doc(db,"quantix_portfolio","project_"+key));
                     if (snap.exists()) return snap.data();
                 } catch(e) { console.error("Cloud load failed:", e); }
+                return null;
+            };
+            window.saveBillHistoryToCloud = async function(suffix, historyArr) {
+                try {
+                    const key = suffix ? suffix.replace(/[^a-zA-Z0-9_]/g,"") : "default";
+                    await setDoc(doc(db,"quantix_portfolio","bill_history_"+key), {history: historyArr, lastSyncTimestamp: new Date().toISOString()});
+                } catch(e) { console.error("Bill history cloud save failed:", e); }
+            };
+            window.loadBillHistoryFromCloud = async function(suffix) {
+                try {
+                    const key = suffix ? suffix.replace(/[^a-zA-Z0-9_]/g,"") : "default";
+                    const snap = await getDoc(doc(db,"quantix_portfolio","bill_history_"+key));
+                    if (snap.exists()) return snap.data().history;
+                } catch(e) { console.error("Bill history cloud load failed:", e); }
                 return null;
             };
             window.saveDivisionsIndexToCloud = async function(list) {
@@ -3698,7 +3712,7 @@
     }
 
     // TAB 4 EXTRA DEDUCTIONS
-    function addDynamicDeductionRow(headName = "Extra Deduction", amt = "") {
+    function addDynamicDeductionRow(headName = "Other Deduction", amt = "") {
         let tbody = document.querySelector('#dynamicDeductionsTable tbody');
         if(!tbody) return;
         let newRow = document.createElement('tr');
@@ -4369,7 +4383,7 @@
         });
     }
 
-    function saveBillHistorySnapshot(snapshot) {
+    async function saveBillHistorySnapshot(snapshot) {
         let hist = getBillHistory();
         // Upsert by sequence: if a record for this bill sequence already exists, update it in place
         // (this is what makes "Edit → Save" correctly refresh the existing history entry instead of duplicating it).
@@ -4383,7 +4397,14 @@
         // Auto-sync shared project fields into every other bill in history.
         syncSharedFieldsAcrossHistory(hist, snapshot);
 
-        _ls.set('rwd_bill_history' + getActiveProjectSuffix(), JSON.stringify(hist));
+        let suffix = getActiveProjectSuffix();
+        _ls.set('rwd_bill_history' + suffix, JSON.stringify(hist));
+
+        // Push the full history array to Firebase too — previously only the CURRENT bill was
+        // cloud-synced (via saveAllDataToCloud), so past bills in history never left this device.
+        if (typeof window.saveBillHistoryToCloud === "function") {
+            try { await window.saveBillHistoryToCloud(suffix, hist); } catch(e) {}
+        }
     }
 
     function openBillHistoryModal() {
@@ -4474,10 +4495,14 @@
     }
 
     function deleteBillHistoryEntry(idx) {
-        showConfirmModal('Is bill record ko history se hatana hai?', () => {
+        showConfirmModal('Is bill record ko history se hatana hai?', async () => {
             let hist = getBillHistory();
             hist.splice(idx, 1);
-            _ls.set('rwd_bill_history' + getActiveProjectSuffix(), JSON.stringify(hist));
+            let suffix = getActiveProjectSuffix();
+            _ls.set('rwd_bill_history' + suffix, JSON.stringify(hist));
+            if (typeof window.saveBillHistoryToCloud === "function") {
+                try { await window.saveBillHistoryToCloud(suffix, hist); } catch(e) {}
+            }
             openBillHistoryModal();
         });
     }
@@ -4529,7 +4554,11 @@
                 //    original index (idx) is still valid because it was before that new append.
                 let hist2 = getBillHistory();
                 hist2.splice(idx, 1);
-                _ls.set('rwd_bill_history' + getActiveProjectSuffix(), JSON.stringify(hist2));
+                let histSuffix = getActiveProjectSuffix();
+                _ls.set('rwd_bill_history' + histSuffix, JSON.stringify(hist2));
+                if (typeof window.saveBillHistoryToCloud === "function") {
+                    try { await window.saveBillHistoryToCloud(histSuffix, hist2); } catch(e) {}
+                }
 
                 // 3) Load the target bill's complete saved data as the active bill
                 //    (also push to cloud first — loadSavedData() prefers cloud data, so local-only
@@ -4757,6 +4786,17 @@
         if (typeof window.loadDataFromCloud === "function") {
             let cloudSnapshot = await window.loadDataFromCloud(suffix);
             if(cloudSnapshot) dataObj = cloudSnapshot;
+        }
+
+        // Pull this project's Bill History down from the cloud too, and refresh the local copy —
+        // otherwise a device that never wrote this project's history locally would see it as empty
+        // even though other devices have already saved bills into it.
+        if (typeof window.loadBillHistoryFromCloud === "function") {
+            let histSuffix = getActiveProjectSuffix();
+            try {
+                let cloudHist = await window.loadBillHistoryFromCloud(histSuffix);
+                if (cloudHist) _ls.set('rwd_bill_history' + histSuffix, JSON.stringify(cloudHist));
+            } catch(e) {}
         }
 
         if (!dataObj) {
@@ -5179,7 +5219,7 @@
             });
         });
 
-        saveBillHistorySnapshot({
+        await saveBillHistorySnapshot({
             seq: document.getElementById('globalBillSequence').value,
             type: document.getElementById('globalBillType').value,
             workName: document.getElementById('globalWorkName').value,
