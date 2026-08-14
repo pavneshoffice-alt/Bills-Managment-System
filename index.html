@@ -1445,6 +1445,7 @@
                                     <th rowspan="2" style="vertical-align:middle;">Gross (With GST)</th>
                                     <th colspan="11" class="ledger-detail-col" style="background:#374151; letter-spacing:0.5px; display:none;">Deductions Breakup</th>
                                     <th rowspan="2" style="vertical-align:middle;">Total Deductions</th>
+                                    <th rowspan="2" style="vertical-align:middle; color:#fb24c2;">Refundable Amount<br><span style="font-size:9px; font-weight:500; opacity:0.85;">(Sec. Deposit + Perf. Security)</span></th>
                                     <th rowspan="2" style="vertical-align:middle; color:#34d399;">Net Payable</th>
                                     <th rowspan="2" style="vertical-align:middle;">Status</th>
                                 </tr>
@@ -1464,6 +1465,8 @@
                             </thead>
                             <tbody id="multiBillLedgerBody">
                             </tbody>
+                            <tfoot id="multiBillLedgerFoot">
+                            </tfoot>
                             </table>
                             </div>
                         </div>
@@ -1853,7 +1856,7 @@
                         </div>
 
                         <div style="border-top: 1px dashed var(--border-color); margin-top: 6px; padding-top: 6px;">
-                            <span style="font-size: 12px; font-weight: bold; color: #ea0ca0;">⚠️ Other Deductions Grid:</span>
+                            <span style="font-size: 12px; font-weight: bold; color: #7fea0c;">⚠️ Extra Deductions Grid:</span>
                             <table class="dynamic-deduct-table" id="dynamicDeductionsTable">
                                 <thead>
                                     <tr>
@@ -3712,7 +3715,7 @@
     }
 
     // TAB 4 EXTRA DEDUCTIONS
-    function addDynamicDeductionRow(headName = "Other Deduction", amt = "") {
+    function addDynamicDeductionRow(headName = "Extra Deduction", amt = "") {
         let tbody = document.querySelector('#dynamicDeductionsTable tbody');
         if(!tbody) return;
         let newRow = document.createElement('tr');
@@ -3903,10 +3906,122 @@
         let billLabel = seqStr + ' ' + typeStr + ' Bill';
 
         let ledgerBody = document.getElementById('multiBillLedgerBody');
+        let ledgerFoot = document.getElementById('multiBillLedgerFoot');
         if (!ledgerBody) return;
         ledgerBody.innerHTML = '';
+        if (ledgerFoot) ledgerFoot.innerHTML = '';
 
-        // --- Read current project real values from DOM ---
+        // Format: Indian number format, no rupee sign
+        function fmt(v) {
+            return (v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        let dCol = 'class="ledger-detail-col" style="display:' + (ledgerBreakdownVisible ? 'table-cell' : 'none') + ';';
+
+        // Builds one <tr> for the ledger table from a normalized bill-data object.
+        function buildRow(d) {
+            let extraCell = '';
+            if (!d.extraRows || d.extraRows.length === 0) {
+                extraCell = '<span style="color:#6b7280;">—</span>';
+            } else {
+                extraCell = d.extraRows.map(r =>
+                    '<div style="font-size:10px; line-height:1.6;">' +
+                    '<span style="color:#94a3b8;">' + r.name + ':</span> ' +
+                    '<span style="color:#fb923c;">' + fmt(r.val) + '</span></div>'
+                ).join('') +
+                (d.extraRows.length > 1
+                    ? '<div style="font-size:11px; font-weight:700; border-top:1px solid #374151; margin-top:2px; color:#f97316;">Total: ' + fmt(d.extraTotal) + '</div>'
+                    : '');
+            }
+
+            let refundable = (d.sd || 0) + (d.perf || 0);
+
+            let tr = document.createElement('tr');
+            tr.style.background = d.isCurrent ? 'rgba(139,92,246,0.13)' : 'rgba(255,255,255,0.02)';
+            tr.style.fontWeight = d.isCurrent ? '700' : '500';
+            tr.innerHTML = `
+                <td style="text-align:left; padding-left:10px;">
+                    ${d.isCurrent ? '🎯' : '📄'} ${d.label}
+                    ${d.isCurrent ? '<span style="font-size:10px; background:rgba(139,92,246,0.3); padding:2px 6px; border-radius:4px; margin-left:6px;">CURRENT</span>' : ''}
+                </td>
+                <td>${fmt(d.gross)}</td>
+                <td ${dCol} color:#fbbf24;">${fmt(d.sd)}</td>
+                <td ${dCol} color:#fbbf24;">${fmt(d.perf)}</td>
+                <td ${dCol} color:#f87171;">${fmt(d.it)}</td>
+                <td ${dCol} color:#f87171;">${fmt(d.sgst)}</td>
+                <td ${dCol} color:#f87171;">${fmt(d.cgst)}</td>
+                <td ${dCol} color:#f87171;">${fmt(d.cess)}</td>
+                <td ${dCol} color:#fb923c;">${fmt(d.royalty)}</td>
+                <td ${dCol} color:#a78bfa;">${fmt(d.dmf)}</td>
+                <td ${dCol} color:#fb923c;">${fmt(d.com)}</td>
+                <td ${dCol} color:#fb923c;">${fmt(d.stamp)}</td>
+                <td ${dCol} vertical-align:top;">${extraCell}</td>
+                <td style="color:#ef4444; font-weight:800;">${fmt(d.totalDeduct)}</td>
+                <td style="color:#fbbf24; font-weight:800;">${fmt(refundable)}</td>
+                <td style="color:#34d399; font-weight:800; font-size:14px;">${fmt(d.net)}</td>
+                <td><span class="status-badge-ms ${d.statusClass}">${d.statusText}</span></td>`;
+            return { tr, refundable, gross: d.gross || 0, totalDeduct: d.totalDeduct || 0, net: d.net || 0,
+                sd: d.sd || 0, perf: d.perf || 0, it: d.it || 0, sgst: d.sgst || 0, cgst: d.cgst || 0,
+                cess: d.cess || 0, royalty: d.royalty || 0, dmf: d.dmf || 0, com: d.com || 0, stamp: d.stamp || 0,
+                extraTotal: d.extraTotal || 0, seq: d.seq };
+        }
+
+        // --- Past bills from Bill History (every bill already saved for this bond/project) ---
+        let allSeqOrder = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
+        let hist = getBillHistory()
+            .filter(h => h.seq !== seqStr); // avoid duplicating the currently-open bill if it's also saved in history
+
+        // If a LATER-sequence bill already exists (either saved in history or the current open bill),
+        // that automatically means every earlier-sequence bill has already been paid — a bill only
+        // moves to the next sequence once the previous one is settled. So instead of a manual "paid"
+        // flag, we derive it: any bill whose sequence is before the highest sequence present is "Paid".
+        let presentSeqIdxs = hist.map(h => allSeqOrder.indexOf(h.seq)).concat([allSeqOrder.indexOf(seqStr)]).filter(i => i !== -1);
+        let maxSeqIdx = presentSeqIdxs.length ? Math.max(...presentSeqIdxs) : -1;
+
+        let totals = { refundable: 0, gross: 0, totalDeduct: 0, net: 0,
+            sd: 0, perf: 0, it: 0, sgst: 0, cgst: 0, cess: 0, royalty: 0, dmf: 0, com: 0, stamp: 0, extra: 0 };
+        let rowCount = 0;
+        let allResults = []; // every bill's built row, regardless of stage — sorted by sequence before rendering
+
+        hist.forEach(h => {
+            let pb = h.paymentBreakdown || {};
+            let extraRows = [];
+            let extraTotal = 0;
+            try {
+                let fd = h.fullData ? JSON.parse(h.fullData) : null;
+                if (fd && Array.isArray(fd.dynamicExtraDeducts)) {
+                    fd.dynamicExtraDeducts.forEach(r => {
+                        let val = parseFloat(r.value) || 0;
+                        if (val !== 0) { extraRows.push({ name: r.name || 'Extra', val: val }); extraTotal += val; }
+                    });
+                }
+            } catch(e) {}
+
+            // "date" is set every time this bill was last snapshotted (created / edited / superseded
+            // by a newer bill) — i.e. exactly "jab wo bill last open hua tab ki date".
+            let billDate = h.date || (h.savedAt ? new Date(h.savedAt).toLocaleDateString('en-IN') : '');
+            let isPaid = allSeqOrder.indexOf(h.seq) < maxSeqIdx;
+            let statusText = isPaid
+                ? ('💰 Paid' + (billDate ? '<br><span style="font-size:9px; font-weight:600; opacity:0.85;">' + billDate + '</span>' : ''))
+                : (h.type === 'Final' ? '✅ Final Submitted' : '✅ Recorded');
+
+            let result = buildRow({
+                label: h.seq + ' ' + h.type + ' Bill',
+                isCurrent: false,
+                seq: h.seq,
+                gross: h.gross,
+                sd: pb.secDeposit, perf: pb.perfSecurity, it: pb.incomeTax,
+                sgst: pb.sgst, cgst: pb.cgst, cess: pb.laborCess,
+                royalty: pb.royalty, dmf: pb.dmf, com: pb.com, stamp: pb.stamp,
+                totalDeduct: h.totalDeductions, net: h.netPayable,
+                extraRows: extraRows, extraTotal: extraTotal,
+                statusClass: 'ms-bg-success',
+                statusText: statusText
+            });
+            allResults.push(result);
+        });
+
+        // --- Currently open/active bill (read live from the DOM, may not be saved yet) ---
         let totalThis = 0;
         document.querySelectorAll('#abstractTable tbody tr').forEach(row => {
             totalThis += parseFloat(row.querySelector('.abs-this-amt').value) || 0;
@@ -3914,79 +4029,96 @@
 
         let gstPercent  = parseFloat(document.getElementById('cfgSettingGST').value) || 0;
         let gross       = totalThis + (totalThis * gstPercent / 100);
-        let sd          = parseFloat(document.getElementById('pSecDepositFinal').innerText)   || 0;
-        let perf        = parseFloat(document.getElementById('pPerfSecurityFinal').innerText) || 0;
-        let it          = parseFloat(document.getElementById('pIncomeTax').innerText)         || 0;
-        let sgst        = parseFloat(document.getElementById('pSgst').innerText)              || 0;
-        let cgst        = parseFloat(document.getElementById('pCgst').innerText)              || 0;
-        let cess        = parseFloat(document.getElementById('pLaborCess').innerText)         || 0;
-        let royalty     = parseFloat(document.getElementById('pRoyaltyFinal').innerText)      || 0;
-        let dmf         = parseFloat(document.getElementById('pDmfFinal').innerText)         || 0;
-        let com         = parseFloat(document.getElementById('pComFinal').innerText)          || 0;
-        let stamp       = parseFloat(document.getElementById('pStampFinal').innerText)        || 0;
-        let totalDeduct = parseFloat(document.getElementById('lblTotalDeductions').innerText) || 0;
-        let net         = parseFloat(document.getElementById('lblActualNetPayableContractor').innerText) || 0;
 
-        // Extra dynamic deductions — collect name+value pairs
-        let extraRows = [];
-        let extraTotal = 0;
+        let curExtraRows = [];
+        let curExtraTotal = 0;
         document.querySelectorAll('#dynamicDeductionsTable tbody tr').forEach(tr => {
             let nameEl = tr.querySelector('.dynamic-head-title');
             let valEl  = tr.querySelector('.dynamic-head-value');
             let val = parseFloat(valEl ? valEl.value : 0) || 0;
             if (val !== 0) {
-                extraRows.push({ name: nameEl ? (nameEl.value || 'Extra') : 'Extra', val: val });
-                extraTotal += val;
+                curExtraRows.push({ name: nameEl ? (nameEl.value || 'Extra') : 'Extra', val: val });
+                curExtraTotal += val;
             }
         });
 
-        // Format: Indian number format, no rupee sign
-        function fmt(v) {
-            return (v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
+        // Same "paid" rule applies to the currently-open bill: normally it IS the highest sequence
+        // (so it stays "Processing"), but if the user has pulled an OLDER bill back into edit mode
+        // while a newer one still exists in history, this bill too counts as already paid.
+        let curIsPaid = allSeqOrder.indexOf(seqStr) < maxSeqIdx;
+        let curDate = new Date().toLocaleDateString('en-IN');
+        let curStatusClass = curIsPaid ? 'ms-bg-success' : 'ms-bg-warning';
+        let curStatusText = curIsPaid
+            ? ('💰 Paid<br><span style="font-size:9px; font-weight:600; opacity:0.85;">' + curDate + '</span>')
+            : 'Processing';
 
-        // Build extra deductions cell content
-        let extraCell = '';
-        if (extraRows.length === 0) {
-            extraCell = '<span style="color:#6b7280;">—</span>';
-        } else {
-            extraCell = extraRows.map(r =>
-                '<div style="font-size:10px; line-height:1.6;">' +
-                '<span style="color:#94a3b8;">' + r.name + ':</span> ' +
-                '<span style="color:#fb923c;">' + fmt(r.val) + '</span></div>'
-            ).join('') +
-            (extraRows.length > 1
-                ? '<div style="font-size:11px; font-weight:700; border-top:1px solid #374151; margin-top:2px; color:#f97316;">Total: ' + fmt(extraTotal) + '</div>'
-                : '');
-        }
+        let curResult = buildRow({
+            label: billLabel,
+            isCurrent: true,
+            seq: seqStr,
+            gross: gross,
+            sd:      parseFloat(document.getElementById('pSecDepositFinal').innerText)   || 0,
+            perf:    parseFloat(document.getElementById('pPerfSecurityFinal').innerText) || 0,
+            it:      parseFloat(document.getElementById('pIncomeTax').innerText)         || 0,
+            sgst:    parseFloat(document.getElementById('pSgst').innerText)              || 0,
+            cgst:    parseFloat(document.getElementById('pCgst').innerText)              || 0,
+            cess:    parseFloat(document.getElementById('pLaborCess').innerText)         || 0,
+            royalty: parseFloat(document.getElementById('pRoyaltyFinal').innerText)      || 0,
+            dmf:     parseFloat(document.getElementById('pDmfFinal').innerText)          || 0,
+            com:     parseFloat(document.getElementById('pComFinal').innerText)          || 0,
+            stamp:   parseFloat(document.getElementById('pStampFinal').innerText)        || 0,
+            totalDeduct: parseFloat(document.getElementById('lblTotalDeductions').innerText) || 0,
+            net:     parseFloat(document.getElementById('lblActualNetPayableContractor').innerText) || 0,
+            extraRows: curExtraRows, extraTotal: curExtraTotal,
+            statusClass: curStatusClass, statusText: curStatusText
+        });
+        allResults.push(curResult);
 
-        // Single row — current project only
-        let tr = document.createElement('tr');
-        tr.style.background = 'rgba(139,92,246,0.13)';
-        tr.style.fontWeight = '700';
-        let dCol = 'class="ledger-detail-col" style="display:' + (ledgerBreakdownVisible ? 'table-cell' : 'none') + ';';
-        tr.innerHTML = `
-            <td style="text-align:left; padding-left:10px;">
-                🎯 ${billLabel}
-                <span style="font-size:10px; background:rgba(139,92,246,0.3); padding:2px 6px; border-radius:4px; margin-left:6px;">CURRENT</span>
-            </td>
-            <td>${fmt(gross)}</td>
-            <td ${dCol} color:#fbbf24;">${fmt(sd)}</td>
-            <td ${dCol} color:#fbbf24;">${fmt(perf)}</td>
-            <td ${dCol} color:#f87171;">${fmt(it)}</td>
-            <td ${dCol} color:#f87171;">${fmt(sgst)}</td>
-            <td ${dCol} color:#f87171;">${fmt(cgst)}</td>
-            <td ${dCol} color:#f87171;">${fmt(cess)}</td>
-            <td ${dCol} color:#fb923c;">${fmt(royalty)}</td>
-            <td ${dCol} color:#a78bfa;">${fmt(dmf)}</td>
-            <td ${dCol} color:#fb923c;">${fmt(com)}</td>
-            <td ${dCol} color:#fb923c;">${fmt(stamp)}</td>
-            <td ${dCol} vertical-align:top;">${extraCell}</td>
-            <td style="color:#ef4444; font-weight:800;">${fmt(totalDeduct)}</td>
-            <td style="color:#34d399; font-weight:800; font-size:14px;">${fmt(net)}</td>
-            <td><span class="status-badge-ms ms-bg-warning">Processing</span></td>`;
-        ledgerBody.appendChild(tr);
+        // Sort ALL bills (past + current) strictly by sequence — 1st, 2nd, 3rd... — irrespective of
+        // stage/type (Running/Final) or whether it's the currently-open bill, so the ledger always
+        // reads in true bill order top-to-bottom.
+        allResults.sort((a, b) => allSeqOrder.indexOf(a.seq) - allSeqOrder.indexOf(b.seq));
+
+        allResults.forEach(result => {
+            ledgerBody.appendChild(result.tr);
+            totals.refundable += result.refundable;
+            totals.gross += result.gross;
+            totals.totalDeduct += result.totalDeduct;
+            totals.net += result.net;
+            totals.sd += result.sd; totals.perf += result.perf; totals.it += result.it;
+            totals.sgst += result.sgst; totals.cgst += result.cgst; totals.cess += result.cess;
+            totals.royalty += result.royalty; totals.dmf += result.dmf; totals.com += result.com;
+            totals.stamp += result.stamp; totals.extra += result.extraTotal;
+            rowCount++;
+        });
+
+        // --- Grand-total footer row (only shown once there's more than one bill worth summing) ---
+        if (ledgerFoot && rowCount > 0) {
+            let footTr = document.createElement('tr');
+            footTr.style.background = '#111827';
+            footTr.style.borderTop = '2px solid #4b5563';
+            footTr.innerHTML = `
+                <td style="text-align:left; padding-left:10px; font-weight:800; color:#e5e7eb;">Σ TOTAL — All Bills (${rowCount})</td>
+                <td style="font-weight:800; color:#e5e7eb;">${fmt(totals.gross)}</td>
+                <td ${dCol} color:#fbbf24; font-weight:800;">${fmt(totals.sd)}</td>
+                <td ${dCol} color:#fbbf24; font-weight:800;">${fmt(totals.perf)}</td>
+                <td ${dCol} color:#f87171; font-weight:800;">${fmt(totals.it)}</td>
+                <td ${dCol} color:#f87171; font-weight:800;">${fmt(totals.sgst)}</td>
+                <td ${dCol} color:#f87171; font-weight:800;">${fmt(totals.cgst)}</td>
+                <td ${dCol} color:#f87171; font-weight:800;">${fmt(totals.cess)}</td>
+                <td ${dCol} color:#fb923c; font-weight:800;">${fmt(totals.royalty)}</td>
+                <td ${dCol} color:#a78bfa; font-weight:800;">${fmt(totals.dmf)}</td>
+                <td ${dCol} color:#fb923c; font-weight:800;">${fmt(totals.com)}</td>
+                <td ${dCol} color:#fb923c; font-weight:800;">${fmt(totals.stamp)}</td>
+                <td ${dCol} color:#f97316; font-weight:800;">${fmt(totals.extra)}</td>
+                <td style="color:#ef4444; font-weight:800;">${fmt(totals.totalDeduct)}</td>
+                <td style="color:#fbbf24; font-weight:900; font-size:13.5px;">${fmt(totals.refundable)}</td>
+                <td style="color:#34d399; font-weight:800; font-size:14px;">${fmt(totals.net)}</td>
+                <td></td>`;
+            ledgerFoot.appendChild(footTr);
+        }
     }
+
 
     // Controls whether the granular deduction-breakup columns show in the Executive Dashboard ledger.
     // Defaults to hidden so the ledger reads clean at a glance; the user can expand on demand.
