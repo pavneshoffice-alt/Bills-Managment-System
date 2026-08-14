@@ -148,8 +148,8 @@
         .btn-pm:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.12); }
         .btn-pm-new { background: var(--primary); color: white; }
         .btn-pm-new:hover { background: var(--primary-dark); transform: translateY(-1px); }
-        .btn-pm-bill { background: rgba(124,58,237,0.1); color: #7c3aed; }
-        .btn-pm-bill:hover { background: #7c3aed; color: white; transform: translateY(-1px); }
+        .btn-pm-bill { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #ffffff; box-shadow: 0 2px 6px rgba(109,40,217,0.35); }
+        .btn-pm-bill:hover { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(109,40,217,0.45); }
         .btn-pm-delete { background: transparent; color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
         .btn-pm-delete:hover { background: var(--danger); color: white; transform: translateY(-1px); }
 
@@ -918,11 +918,11 @@
         /* Semantic solid button variants — reusable across the app so colors/contrast stay consistent
            instead of one-off inline background+color combos (root cause of the earlier invisible-text bug). */
         .btn-solid { color: #ffffff !important; font-weight: 700; border-radius: 8px; cursor: pointer; }
-        .btn-solid-indigo  { background: #6366f1; border: 1px solid #4f46e5; }
+        .btn-solid-indigo  { background: #6366f1; border: 1px solid #4f46e5; border-radius: 999px; }
         .btn-solid-indigo:hover  { background: #4f46e5; }
         .btn-solid-emerald { background: #059669; border: 1px solid #047857; }
         .btn-solid-emerald:hover { background: #047857; }
-        .btn-solid-amber   { background: #d97706; border: 1px solid #b45309; }
+        .btn-solid-amber   { background: #d97706; border: 1px solid #b45309; border-radius: 999px; }
         .btn-solid-amber:hover   { background: #b45309; }
         .btn-solid-rose    { background: #e11d48; border: 1px solid #be123c; }
         .btn-solid-rose:hover    { background: #be123c; }
@@ -1445,7 +1445,7 @@
                                     <th rowspan="2" style="vertical-align:middle;">Gross (With GST)</th>
                                     <th colspan="11" class="ledger-detail-col" style="background:#374151; letter-spacing:0.5px; display:none;">Deductions Breakup</th>
                                     <th rowspan="2" style="vertical-align:middle;">Total Deductions</th>
-                                    <th rowspan="2" style="vertical-align:middle; color:#fb24c2;">Refundable Amount<br><span style="font-size:9px; font-weight:500; opacity:0.85;">(Sec. Deposit + Perf. Security)</span></th>
+                                    <th rowspan="2" style="vertical-align:middle; color:#fc03d7;">Refundable Amount<br><span style="font-size:9px; font-weight:500; opacity:0.85;">(SD+PS)</span></th>
                                     <th rowspan="2" style="vertical-align:middle; color:#34d399;">Net Payable</th>
                                     <th rowspan="2" style="vertical-align:middle;">Status</th>
                                 </tr>
@@ -1460,7 +1460,7 @@
                                     <th style="background:#374151;">DMF</th>
                                     <th style="background:#374151;">CESS (COM)</th>
                                     <th style="background:#374151;">Stamp</th>
-                                    <th style="background:#374151;">Extra Deductions</th>
+                                    <th style="background:#374151;">Other Deductions</th>
                                 </tr>
                             </thead>
                             <tbody id="multiBillLedgerBody">
@@ -1856,7 +1856,7 @@
                         </div>
 
                         <div style="border-top: 1px dashed var(--border-color); margin-top: 6px; padding-top: 6px;">
-                            <span style="font-size: 12px; font-weight: bold; color: #7fea0c;">⚠️ Extra Deductions Grid:</span>
+                            <span style="font-size: 12px; font-weight: bold; color: #ea0cbe;">⚠️ Other Deductions Grid:</span>
                             <table class="dynamic-deduct-table" id="dynamicDeductionsTable">
                                 <thead>
                                     <tr>
@@ -3715,7 +3715,7 @@
     }
 
     // TAB 4 EXTRA DEDUCTIONS
-    function addDynamicDeductionRow(headName = "Extra Deduction", amt = "") {
+    function addDynamicDeductionRow(headName = "Other Deductions", amt = "") {
         let tbody = document.querySelector('#dynamicDeductionsTable tbody');
         if(!tbody) return;
         let newRow = document.createElement('tr');
@@ -3752,7 +3752,7 @@
         if(!tbody) return;
         tbody.innerHTML = '';
         if(arr.length === 0) {
-            addDynamicDeductionRow("Extra Deduction", "");
+            addDynamicDeductionRow("Other Deduction", "");
         } else {
             arr.forEach(item => {
                 addDynamicDeductionRow(item.name, item.value);
@@ -3957,7 +3957,7 @@
                 <td ${dCol} color:#fb923c;">${fmt(d.stamp)}</td>
                 <td ${dCol} vertical-align:top;">${extraCell}</td>
                 <td style="color:#ef4444; font-weight:800;">${fmt(d.totalDeduct)}</td>
-                <td style="color:#fbbf24; font-weight:800;">${fmt(refundable)}</td>
+                <td style="color:#fc03d7; font-weight:800;">${fmt(refundable)}</td>
                 <td style="color:#34d399; font-weight:800; font-size:14px;">${fmt(d.net)}</td>
                 <td><span class="status-badge-ms ${d.statusClass}">${d.statusText}</span></td>`;
             return { tr, refundable, gross: d.gross || 0, totalDeduct: d.totalDeduct || 0, net: d.net || 0,
@@ -3992,7 +3992,7 @@
                 if (fd && Array.isArray(fd.dynamicExtraDeducts)) {
                     fd.dynamicExtraDeducts.forEach(r => {
                         let val = parseFloat(r.value) || 0;
-                        if (val !== 0) { extraRows.push({ name: r.name || 'Extra', val: val }); extraTotal += val; }
+                        if (val !== 0) { extraRows.push({ name: r.name || 'Other', val: val }); extraTotal += val; }
                     });
                 }
             } catch(e) {}
@@ -4037,7 +4037,7 @@
             let valEl  = tr.querySelector('.dynamic-head-value');
             let val = parseFloat(valEl ? valEl.value : 0) || 0;
             if (val !== 0) {
-                curExtraRows.push({ name: nameEl ? (nameEl.value || 'Extra') : 'Extra', val: val });
+                curExtraRows.push({ name: nameEl ? (nameEl.value || 'Other') : 'Other', val: val });
                 curExtraTotal += val;
             }
         });
@@ -4098,7 +4098,7 @@
             footTr.style.background = '#111827';
             footTr.style.borderTop = '2px solid #4b5563';
             footTr.innerHTML = `
-                <td style="text-align:left; padding-left:10px; font-weight:800; color:#e5e7eb;">Σ TOTAL — All Bills (${rowCount})</td>
+                <td style="text-align:left; padding-left:10px; font-weight:800; color:#e5e7eb;">TOTAL — All Bills (${rowCount})</td>
                 <td style="font-weight:800; color:#e5e7eb;">${fmt(totals.gross)}</td>
                 <td ${dCol} color:#fbbf24; font-weight:800;">${fmt(totals.sd)}</td>
                 <td ${dCol} color:#fbbf24; font-weight:800;">${fmt(totals.perf)}</td>
@@ -4112,7 +4112,7 @@
                 <td ${dCol} color:#fb923c; font-weight:800;">${fmt(totals.stamp)}</td>
                 <td ${dCol} color:#f97316; font-weight:800;">${fmt(totals.extra)}</td>
                 <td style="color:#ef4444; font-weight:800;">${fmt(totals.totalDeduct)}</td>
-                <td style="color:#fbbf24; font-weight:900; font-size:13.5px;">${fmt(totals.refundable)}</td>
+                <td style="color:#fc03d7; font-weight:900; font-size:13.5px;">${fmt(totals.refundable)}</td>
                 <td style="color:#34d399; font-weight:800; font-size:14px;">${fmt(totals.net)}</td>
                 <td></td>`;
             ledgerFoot.appendChild(footTr);
@@ -4955,7 +4955,7 @@
             document.getElementById('globalBillSequence').value = '1st';
             document.getElementById('globalBillType').value = 'Running';
             document.getElementById('cfgContractorTypeDropdown').value = 'individual';
-            addSingleRowTab1(); addSingleRowTab2(null, true); addSingleRowTab3(); addDynamicDeductionRow("Extra Deduction", "");
+            addSingleRowTab1(); addSingleRowTab2(null, true); addSingleRowTab3(); addDynamicDeductionRow("Other Deduction", "");
             toggleLastPaidDateVisibility(); 
             if(badge) {
                 badge.innerText = "✓ Ready";
